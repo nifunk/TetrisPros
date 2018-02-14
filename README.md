@@ -2,14 +2,14 @@
 
 This is a basic Tetris simulation.
 
-##Files:
+## Files
 State - tetris simulation
 TFrame - frame that draws the board
 TLabel - drawing library
 PlayerSkeleton - setup for implementing a player
 
 
-##State:
+## State
 This is the tetris simulation.  It keeps track of the state and allows you to
 make moves.  The board state is stored in field (a double array of integers) and
 is accessed by getField().  Zeros denote an empty square.  Other values denote
@@ -35,12 +35,8 @@ This extends JFrame and is instantiated to draw a state.
 It can save the current drawing to a .png file.
 The main function allows you to play a game manually using the arrow keys.
 
-
-
 TLabel:
 This is a drawing library.
-
-
 
 PlayerSkeleton:
 An example of how to implement a player.
