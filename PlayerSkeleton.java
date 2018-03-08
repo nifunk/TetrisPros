@@ -1,3 +1,5 @@
+import game.State;
+import game.TFrame;
 
 public class PlayerSkeleton {
 
