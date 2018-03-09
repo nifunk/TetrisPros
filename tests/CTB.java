@@ -1,20 +1,24 @@
 package tests;
 
+import learning.Game;
+import learning.Results;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import javax.swing.*;
 
-public class CTB {
-
-    static public int num_states  = 2*CTBConstants.window_width;
-    static public int[] actions   = {-CTBConstants.catcher_speed, 0, +CTBConstants.catcher_speed};
-    static public int num_actions = 3;
+public class CTB extends Game {
 
     private CTBState state = new CTBState();
     private Panel panel    = new Panel();
 
     public CTB() {
+        // Define game specific variables.
+        num_states  = 2*CTBConstants.window_width;
+        actions     = new int[]{-CTBConstants.catcher_speed, 0, +CTBConstants.catcher_speed};
+        num_actions = 3;
+        // Initialise visualisation frame.
         JFrame frame = new JFrame("Catch the Ball !");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
@@ -25,22 +29,31 @@ public class CTB {
         frame.setVisible(true);
     }
 
+    @Override
     public Results step(final int action_index) {
         state.update(actions[action_index]);
         panel.repaint();
         return new Results(reward(), state(), terminal());
     }
 
-    private boolean terminal() {
+    @Override
+    protected boolean terminal() {
         return state.ball_pos.y > CTBConstants.window_height;
     }
 
-    private int reward() {
+    @Override
+    protected int reward() {
         return - Math.abs(state.catcher_pos.x - state.ball_pos.x);
     }
 
-    private int state() {
+    @Override
+    protected int state() {
         return state.catcher_pos.x - state.ball_pos.x + CTBConstants.window_width;
+    }
+
+    @Override
+    public Game restart() {
+        return new CTB();
     }
 
     private class Panel extends JPanel {
@@ -65,21 +78,6 @@ public class CTB {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    public static class Results {
-
-        public int reward;
-        public int state;
-        public boolean terminated;
-
-        public Results(final int rew, final int sta, final boolean term) {
-            reward = rew; state = sta; terminated = term;
-        }
-
-        public Results() {
-            reward = 0; state = 0; terminated = false;
         }
     }
 }
