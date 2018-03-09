@@ -622,13 +622,4 @@ public class TLabel{
 
 	}
 
-	
-
-
-	
-
-	
-	
-
-	
 }
