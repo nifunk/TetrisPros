@@ -6,7 +6,7 @@ This is a basic Tetris simulation.
 game.State - tetris simulation
 game.TFrame - frame that draws the board
 game.TLabel - drawing library
-game.PlayerSkeleton - setup for implementing a player
+game.Player - setup for implementing a player
 
 
 ## game.State
@@ -38,6 +38,6 @@ The main function allows you to play a game manually using the arrow keys.
 game.TLabel:
 This is a drawing library.
 
-game.PlayerSkeleton:
+game.Player:
 An example of how to implement a player.
 The main function plays a game automatically (with visualization).
