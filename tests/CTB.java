@@ -43,13 +43,13 @@ public class CTB extends Game {
     }
 
     @Override
-    protected int reward() {
-        return - Math.abs(state.catcher_pos.x - state.ball_pos.x);
+    protected double reward() {
+        return - (double)Math.abs(state.catcher_pos.x - state.ball_pos.x);
     }
 
     @Override
-    protected int state() {
-        return state.catcher_pos.x - state.ball_pos.x + CTBConstants.window_width;
+    protected int[] state() {
+        return new int[]{state.catcher_pos.x - state.ball_pos.x + CTBConstants.window_width};
     }
 
     @Override

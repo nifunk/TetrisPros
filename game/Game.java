@@ -10,9 +10,9 @@ public abstract class Game {
 
     abstract protected boolean terminal();
 
-    abstract protected int reward();
+    abstract protected double reward();
 
-    abstract protected int state();
+    abstract protected int[] state();
 
     abstract public Game restart();
 }
