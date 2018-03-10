@@ -21,9 +21,9 @@ public class QLearning {
 
     public int perform() {
         int total_reward = 0;
-        Results results  = new Results();
+        Results results  = new Results(0, new int[]{0}, false);
         while (! results.terminated) {
-            results       = game.step(act(results.state));
+            results       = game.step(act(results.state[0]));
             total_reward += results.reward;
         }
         return total_reward;
@@ -37,15 +37,11 @@ public class QLearning {
             alphas[k] = 1.0 - (1.0 - MIN_ALPHA)/iterations*k;
         }
         // Training periods - Adapt q matrix by exploration.
-        Results current = new Results();
+        Results current = new Results(0, new int[]{0}, false);
         for(int k = 0; k < iterations; ++k) {
-            final int action = act(current.state);
+            final int action = act(current.state[0]);
             Results next = game.step(action);
-
-            System.out.printf("Action: %d Reward: %d, State: %d\n",
-                              action, next.reward, next.state);
-
-            q_matrix.adapt(current.state, next.state,
+            q_matrix.adapt(current.state[0], next.state[0],
                            action, next.reward, alphas[k]);
             current = next;
             if (current.terminated) game = game.restart();
@@ -86,7 +82,7 @@ public class QLearning {
         }
 
         private void adapt(final int state, final int next_state,
-                           final int action, final int reward, final double alpha) {
+                           final int action, final double reward, final double alpha) {
             final double exp_total_reward = reward + GAMMA*bestAction(next_state);
             q_matrix[state][action] += alpha*(exp_total_reward - q_matrix[state][action]);
         }
