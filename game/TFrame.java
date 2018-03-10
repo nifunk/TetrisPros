@@ -28,7 +28,7 @@ public class TFrame extends JFrame implements KeyListener{
 		s.label = label;
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);            // closes all windows when this is closed
-		setTitle("Tetris BKW");
+		setTitle("Tetris_Q BKW");
 		setContentPane(label.draw);
 		pack();
 		label.BORDER = .05;
@@ -52,7 +52,7 @@ public class TFrame extends JFrame implements KeyListener{
 		s.label = label;
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);            // closes all windows when this is closed
-		setTitle("Eric Whitman's Tetris Simulator");
+		setTitle("Eric Whitman's Tetris_Q Simulator");
 		setContentPane(label.draw);
 		pack();
 		label.BORDER = .05;

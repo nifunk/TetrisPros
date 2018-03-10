@@ -1,5 +1,7 @@
 package learning;
 
+import game.Game;
+import game.Results;
 import tests.CTB;
 
 import java.util.Random;

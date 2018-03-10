@@ -1,7 +1,7 @@
 package tests;
 
-import learning.Game;
-import learning.Results;
+import game.Game;
+import game.Results;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -12,6 +12,7 @@ public class CTB extends Game {
 
     private CTBState state = new CTBState();
     private Panel panel    = new Panel();
+    private JFrame frame;
 
     public CTB() {
         // Define game specific variables.
@@ -19,7 +20,7 @@ public class CTB extends Game {
         actions     = new int[]{-CTBConstants.catcher_speed, 0, +CTBConstants.catcher_speed};
         num_actions = 3;
         // Initialise visualisation frame.
-        JFrame frame = new JFrame("Catch the Ball !");
+        frame = new JFrame("Catch the Ball !");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
         frame.add(panel);
@@ -53,6 +54,8 @@ public class CTB extends Game {
 
     @Override
     public Game restart() {
+        frame.setVisible(false);
+        frame.dispose();
         return new CTB();
     }
 

@@ -1,13 +1,14 @@
-package game;
+package learning;
 
-import learning.Game;
-import learning.Results;
+import game.Game;
+import game.Results;
+import game.State;
 
-public class Tetris extends Game {
+public class Tetris_Q extends Game {
 
     private State state;
 
-    public Tetris() {
+    public Tetris_Q() {
         // Define game specific variables.
         // num_states : top-row boolean for every figure (7)
         // num_actions: each column (10) with each orientation (4)
@@ -34,7 +35,7 @@ public class Tetris extends Game {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return new Results(0, 0, false);
+        return new Results(reward(), state(), terminal());
     }
 
     @Override
@@ -54,7 +55,7 @@ public class Tetris extends Game {
 
     @Override
     public Game restart() {
-        return new Tetris();
+        return new Tetris_Q();
     }
 
 }
