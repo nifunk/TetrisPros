@@ -1,14 +1,14 @@
-package learning;
+package genetic;
 
 import game.Game;
 import game.Results;
 import game.State;
 
-public class Tetris_Q extends Game {
+public class Tetris_gen extends Game {
 
     private State state;
 
-    public Tetris_Q() {
+    public Tetris_gen() {
         // Define game specific variables.
         // num_states : top-row boolean for every figure (7)
         // num_actions: each column (10) with each orientation (4)
@@ -55,7 +55,7 @@ public class Tetris_Q extends Game {
 
     @Override
     public Game restart() {
-        return new Tetris_Q();
+        return new Tetris_gen();
     }
 
 }
