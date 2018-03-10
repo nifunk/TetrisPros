@@ -44,13 +44,13 @@ public class Tetris_Q extends Game {
     }
 
     @Override
-    protected int reward() {
+    protected double reward() {
         return 0;
     }
 
     @Override
-    protected int state() {
-        return -1;
+    protected int[] state() {
+        return new int[]{-1};
     }
 
     @Override
