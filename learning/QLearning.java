@@ -12,7 +12,9 @@ public class QLearning {
     public Game game;
     private final double MIN_ALPHA = 0.2;
     private final double GAMMA     = 1.0;
-    private final double EPS       = 0.4;
+    private final double EPS       = 0.3;
+
+    private boolean training_mode  = false;
 
     public QLearning(Game game) {
         this.game = game;
@@ -20,18 +22,25 @@ public class QLearning {
     }
 
     public void perform() {
+        training_mode = false;
         game.Results results  = game.initial();
-        while (! results.terminated) {
+        int terminal_counter  = 0;
+        while (terminal_counter < 10) {
             final int action = act(results.state);
             if (game.checkAction(action)) {
                 results = game.step(action);
             } else {
                 results = new Results(-1000.0, results.state, results.terminated);
             }
+            if (results.terminated) {
+                game = game.restart();
+                terminal_counter++;
+            }
         }
     }
 
     public void adapt(final int iterations) {
+        training_mode = true;
         // Initialise learning rates as decreasing with time
         // for better adaption.
         double[] alphas = new double[iterations];
@@ -60,7 +69,7 @@ public class QLearning {
 
     private int act(final int[] state) {
         final Random generator = new Random();
-        if (generator.nextDouble() < EPS) {
+        if (training_mode && generator.nextDouble() < EPS) {
             return generator.nextInt(game.numActions());
         } else {
             return q_matrix.bestAction(game.toScalarState(state));
@@ -75,8 +84,8 @@ public class QLearning {
             q_matrix = new double[num_states][num_actions];
         }
 
-        private int bestAction(final int state) {
-            final double[] options = q_matrix[state];
+        private int bestAction(final int scalar_state) {
+            final double[] options = q_matrix[scalar_state];
             int best_option        = -1;
             double max             = Double.NEGATIVE_INFINITY;
             for (int i = 0; i < options.length; i++) {
@@ -89,10 +98,10 @@ public class QLearning {
             return best_option;
         }
 
-        private void adapt(final int state, final int next_state,
+        private void adapt(final int scalar_state, final int scalar_next_state,
                            final int action, final double reward, final double alpha) {
-            final double exp_total_reward = reward + GAMMA*bestAction(next_state);
-            q_matrix[state][action] += alpha*(exp_total_reward - q_matrix[state][action]);
+            final double exp_total_reward = reward + GAMMA*bestAction(scalar_next_state);
+            q_matrix[scalar_state][action] += alpha*(exp_total_reward - q_matrix[scalar_state][action]);
         }
 
         public void storeMatrix(final String filename) {

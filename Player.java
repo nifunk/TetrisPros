@@ -11,7 +11,7 @@ public class Player {
         Tetris_Q tetris = new Tetris_Q();
 		QLearning agent = new QLearning(tetris);
         // Train agent, i.e. adapt q matrix with experience.
-        //agent.q_matrix.loadMatrix("../learning/q_matrix/tetris.txt");
+        agent.q_matrix.loadMatrix("../learning/q_matrix/tetris.txt");
 		agent.adapt(1000000);
 		agent.q_matrix.storeMatrix("../learning/q_matrix/tetris.txt");
 		// Perform as demonstration of results.
