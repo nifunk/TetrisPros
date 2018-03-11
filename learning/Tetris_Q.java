@@ -16,6 +16,8 @@ public class Tetris_Q extends Game {
     private static int N_STATE   = State.COLS + 1;
     private static int N_ACTIONS = State.COLS * 4;
 
+    private boolean visualise_game = false;
+
     public Tetris_Q() {
         // Fill map of states.
         int state_index = 0;
@@ -32,7 +34,7 @@ public class Tetris_Q extends Game {
         }
         // Start tetris game.
         state = new State();
-        new TFrame(state);
+        if (visualise_game) activateVisualisation();
     }
 
     @Override
@@ -48,12 +50,13 @@ public class Tetris_Q extends Game {
         final int orient = action_index / State.COLS;
         final int slot   = action_index % State.COLS;
         state.makeMove(orient, slot);
-        // Draw new state and next piece.
-        state.draw(); state.drawNext(0,0);
-        try {
-            Thread.sleep(300);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (visualise_game) {
+            state.draw(); state.drawNext(0,0);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         return new Results(reward(), state(), terminal());
     }
@@ -65,12 +68,7 @@ public class Tetris_Q extends Game {
 
     @Override
     protected double reward() {
-        final int[] highest_row = getHighestRow();
-        int stone_count         = 0;
-        for (int stone : highest_row) {
-            if (stone != 0) stone_count++;
-        }
-        return - stone_count; 
+        return - getHighest();
     }
 
     @Override
@@ -86,17 +84,22 @@ public class Tetris_Q extends Game {
     }
 
     private int[] getHighestRow() {
-        final int[] top = state.getTop();
-        int highest_row = -1;
-        for (int height : top) {
-            if (height > highest_row) highest_row = height;
-        }
+        final int highest_row = getHighest();
         int[] return_row = new int[State.COLS];
         int[][] field    = state.getField();
         for (int k = 0; k < return_row.length; ++k) {
             return_row[k] = field[State.ROWS - highest_row][k] != 0 ? 1 : 0;
         }
         return return_row;
+    }
+
+    private int getHighest() {
+        final int[] top = state.getTop();
+        int highest = -1;
+        for (int height : top) {
+            if (height > highest) highest = height;
+        }
+        return highest;
     }
 
     @Override
@@ -137,6 +140,12 @@ public class Tetris_Q extends Game {
     @Override
     public int numActions() {
         return N_ACTIONS;
+    }
+
+    @Override
+    public void activateVisualisation() {
+        visualise_game = true;
+        new TFrame(state);
     }
 
 }

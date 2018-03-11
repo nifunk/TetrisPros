@@ -3,16 +3,16 @@ package learning;
 import game.Game;
 import game.Results;
 
-import java.util.Arrays;
+import java.io.*;
 import java.util.Random;
 
 public class QLearning {
 
-    private QMatrix q_matrix;
-    private Game game;
+    public QMatrix q_matrix;
+    public Game game;
     private final double MIN_ALPHA = 0.2;
     private final double GAMMA     = 1.0;
-    private final double EPS       = 0.2;
+    private final double EPS       = 0.4;
 
     public QLearning(Game game) {
         this.game = game;
@@ -48,10 +48,6 @@ public class QLearning {
             } else {
                 next = new Results(-1000.0, current.state, current.terminated);
             }
-
-            System.out.printf("Action: %d, Reward: %f\n", action, next.reward);
-            System.out.println(Arrays.toString(next.state));
-
             q_matrix.adapt(game.toScalarState(current.state),
                            game.toScalarState(next.state),
                            action, next.reward, alphas[k]);
@@ -71,7 +67,7 @@ public class QLearning {
         }
     }
 
-    private class QMatrix {
+    public class QMatrix {
 
         private double[][] q_matrix;
 
@@ -99,5 +95,37 @@ public class QLearning {
             q_matrix[state][action] += alpha*(exp_total_reward - q_matrix[state][action]);
         }
 
+        public void storeMatrix(final String filename) {
+            try {
+                final FileWriter fw = new FileWriter(filename);
+                for (double[] action_rewards : q_matrix) {
+                    for (double reward : action_rewards) {
+                        fw.write(reward + ",");
+                    }
+                    fw.write("\n");
+                }
+                fw.close();
+            } catch (IOException e) { e.printStackTrace(); }
+            System.out.println("Stored Q Matrix in " + filename);
+        }
+
+        public void loadMatrix(final String filename) {
+            int x = 0, y;
+            try {
+                final BufferedReader in = new BufferedReader(new FileReader(filename));
+                String line;
+                while ((line = in.readLine()) != null) {
+                    final String[] values = line.split(",");
+                    y = 0;
+                    for (String str : values) {
+                        q_matrix[x][y] = Double.parseDouble(str);
+                        y++;
+                    }
+                    x++;
+                }
+            } catch (IOException e) { e.printStackTrace(); }
+            System.out.println("Loaded Q Matrix in " + filename);
+        }
     }
+
 }

@@ -1,5 +1,4 @@
 import learning.QLearning;
-
 import tests.CTB;
 
 public class CTBPlayer{

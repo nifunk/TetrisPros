@@ -30,4 +30,7 @@ public abstract class Game {
     abstract public int numStates();
     abstract public int numActions();
 
+    // Activate visualisation (as initially deactivated).
+    abstract public void activateVisualisation();
+
 }
