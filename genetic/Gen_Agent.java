@@ -20,6 +20,7 @@ public class Gen_Agent {
     }
 
     public int perform() {
+        //just the function which really does the performance!
         int total_reward = 0;
         Results results  = new Results(0, new int[]{0}, false);
         while (! results.terminated) {
@@ -51,12 +52,14 @@ public class Gen_Agent {
     }
 
     private int act(final int state) {
+        //here we decide on the next move!!!
         final Random generator = new Random();
-        if (generator.nextDouble() < EPS) {
-            return generator.nextInt(CTB.num_actions);
-        } else {
-            return q_matrix.bestAction(state);
-        }
+        //if (generator.nextDouble() < EPS) {
+        //    return generator.nextInt(CTB.num_actions);
+        //} else {
+        //    return q_matrix.bestAction(state);
+        //}
+        return 0;
     }
 
     private class QMatrix {
