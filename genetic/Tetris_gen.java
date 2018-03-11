@@ -5,6 +5,8 @@ import game.Results;
 import game.State;
 import game.TFrame;
 
+import java.util.Arrays;
+
 public class Tetris_gen extends Game {
 
     private State state;
@@ -30,6 +32,9 @@ public class Tetris_gen extends Game {
     @Override
     public Results step(final int action_index) {
         //This is where we ultimately MAKE!! the move
+
+        int[]tryout = this.state();
+
         state.makeMove(0,0);
         // Draw new state and next piece.
         state.draw();
@@ -57,7 +62,36 @@ public class Tetris_gen extends Game {
     @Override
     protected int[] state() {
         // This function returns the current state!
-        return new int[] {-1};
+        //consists of the filed followd by the current stone
+        int stone = state.getNextPiece();
+        //int stone = 0;
+        int[][] field = state.getField();
+        //System.out.println(Arrays.deepToString(field));
+        int height = field.length; //height of field
+        int width = field[0].length; //width of field
+        //System.out.printf("size is %d x %d%n", len1, len2);
+
+        //building final state array:
+        //state_arr[0] == position where the stone information is -> before there is the field!
+        //state_arr[1] == width of field
+        //state_arr[2] == height of field
+        //state_arr[state_arr[0]]==stone info!!! in between there is the field!!
+        int[] state_arr = new int [height*width+4]; //4=pos_stone+height+width+numberofstone
+
+        state_arr[0] = (height*width+4)-1; //this info could also be computed from others but i thought that would make
+        //it easier!
+        state_arr[1] = width;
+        state_arr[2] = height;
+        state_arr[state_arr[0]] = stone;
+
+        for (int h=0; h<height; h++){
+            for (int w=0; w<width; w++){
+                state_arr[h*width+w+3]=field[h][w];
+            }
+        }
+        //System.out.println(Arrays.toString(state_arr));
+        //System.out.printf("size is %d", state_arr.length);
+        return state_arr;
     }
 
     @Override
