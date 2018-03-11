@@ -41,3 +41,7 @@ This is a drawing library.
 game.Player:
 An example of how to implement a player.
 The main function plays a game automatically (with visualization).
+
+## Ideas
+* Encode whole state: Autoencoder (neural network), PCA
+* General Gaming Agent ??
