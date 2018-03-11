@@ -49,14 +49,18 @@ public class CTB extends Game {
 
     @Override
     public int toScalarState(final int[] state) {
-        return state[0];
+        return Math.max(state[0], 0);
     }
 
     @Override
     public Game restart() {
-        frame.setVisible(false);
-        frame.dispose();
-        return new CTB();
+        CTB new_game = new CTB();
+        if (visualise_game) {
+            frame.setVisible(false);
+            frame.dispose();
+            new_game.activateVisualisation();
+        }
+        return new_game;
     }
 
     @Override
@@ -66,6 +70,11 @@ public class CTB extends Game {
 
     @Override
     public boolean checkAction(final int action_index) {
+        final int x = state.catcher_pos.x;
+        if (action_index == 2 && x >= CTBConstants.window_width - CTBConstants.catcher_speed*2
+            || action_index == 0 && x <= CTBConstants.catcher_speed*2) {
+            return false;
+        }
         return 0 <= action_index && action_index < 3;
     }
 
