@@ -2,8 +2,8 @@ package learning;
 
 import game.Game;
 import game.Results;
-import tests.CTB;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class QLearning {
@@ -16,17 +16,14 @@ public class QLearning {
 
     public QLearning(Game game) {
         this.game = game;
-        q_matrix  = new QMatrix(game.num_states, game.num_actions);
+        q_matrix  = new QMatrix(game.numStates(), game.numActions());
     }
 
-    public int perform() {
-        int total_reward = 0;
-        Results results  = new Results(0, new int[]{0}, false);
+    public void perform() {
+        game.Results results  = game.initial();
         while (! results.terminated) {
-            results       = game.step(act(results.state[0]));
-            total_reward += results.reward;
+            results = game.step(act(results.state));
         }
-        return total_reward;
     }
 
     public void adapt(final int iterations) {
@@ -37,11 +34,21 @@ public class QLearning {
             alphas[k] = 1.0 - (1.0 - MIN_ALPHA)/iterations*k;
         }
         // Training periods - Adapt q matrix by exploration.
-        Results current = new Results(0, new int[]{0}, false);
+        Results current = game.initial();
+        Results next;
         for(int k = 0; k < iterations; ++k) {
-            final int action = act(current.state[0]);
-            Results next = game.step(action);
-            q_matrix.adapt(current.state[0], next.state[0],
+            final int action = act(current.state);
+            if (game.checkAction(action)) {
+                next = game.step(action);
+            } else {
+                next = new Results(-1000.0, current.state, current.terminated);
+            }
+
+            System.out.printf("Action: %d, Reward: %f\n", action, next.reward);
+            System.out.println(Arrays.toString(next.state));
+
+            q_matrix.adapt(game.toScalarState(current.state),
+                           game.toScalarState(next.state),
                            action, next.reward, alphas[k]);
             current = next;
             if (current.terminated) game = game.restart();
@@ -50,12 +57,12 @@ public class QLearning {
         }
     }
 
-    private int act(final int state) {
+    private int act(final int[] state) {
         final Random generator = new Random();
         if (generator.nextDouble() < EPS) {
-            return generator.nextInt(CTB.num_actions);
+            return generator.nextInt(game.numActions());
         } else {
-            return q_matrix.bestAction(state);
+            return q_matrix.bestAction(game.toScalarState(state));
         }
     }
 
