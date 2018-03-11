@@ -42,11 +42,11 @@ public class Tetris_gen extends Game {
         state.draw();
         state.drawNext(0,0);
         try {
-            Thread.sleep(500);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return new Results(reward(), state(), terminal());
+        return new Results(state.getRowsCleared(), state(), terminal());
     }
 
 
@@ -152,6 +152,8 @@ public class Tetris_gen extends Game {
     //output: state and whether terminated, reward == num rows cleared!!!
     public Results virtual_move(int[] own_state, int action_index){
 
+        Results outcome = new Results(0, new int[own_state.length],false);
+
         //find out orientation and slot of wanted move
         int[][] all_moves = this.actions();
         int orient = all_moves[action_index][0];
@@ -160,6 +162,8 @@ public class Tetris_gen extends Game {
         //reconstruct the field:
         int width_field = own_state[1];
         int height_field = own_state[2];
+        outcome.state[1] = own_state[1];
+        outcome.state[2] = own_state[2];
         int[][]field = new int[height_field][width_field];
         for (int h=0; h<height_field;h++ ) {
             for (int w = 0; w < width_field; w++) {
@@ -169,7 +173,7 @@ public class Tetris_gen extends Game {
         //next piece
         int nextPiece = own_state[own_state[0]];
 
-        Results outcome = new Results(0, new int[own_state.length],false);
+
 
         //Reading in the needed values and make a copy of the arrays
         //without copy: pointer issues!!!!!!!!
@@ -261,15 +265,52 @@ public class Tetris_gen extends Game {
 
     //input: virtual state
     //output: array of features!
-    public double[] features (int[] virtual_state){
-        //TODO: define!!
-        return new double[]{0};
+    public double[] features (Results virtual_state_res){
+        int[] virtual_state = virtual_state_res.state;
+        double num_cleared_rows = virtual_state_res.reward;
+        int field_width = virtual_state[1];
+        int field_height = virtual_state[2];
+
+        // calc number of holes/check for holes
+        int num_holes = 0;
+        for (int i =0; i<field_width*(field_height-1)-1;i++){
+            int calc = virtual_state[3+i]-virtual_state[3+field_width+i]; //lower - upper
+            //if above there is one but below not -> will yield to -1!!!
+            if (calc<0){
+                num_holes++;
+            }
+        }
+
+        //calc height of each column
+        int[]height_map = new int[field_width];
+        for (int i =0; i<field_width;i++){
+            for (int j=0; j<field_height;j++){ //go over all possible heights!
+                if (virtual_state[3+i+j*field_width]!=0){
+                    height_map[i]=j;
+                }
+            }
+        }
+
+        //from there extract: aggregate height:
+        int aggregate_height = 0;
+        for (int j=0; j<field_width; j++){
+            aggregate_height = aggregate_height + height_map[j];
+        }
+
+        //from there extract: bumpieness:
+        int bumpieness = 0;
+        for (int j=1; j<field_width; j++){
+            bumpieness = bumpieness + Math.abs(height_map[j]-height_map[j-1]);
+        }
+
+        return new double[]{num_holes,num_cleared_rows,aggregate_height,bumpieness};
     }
 
     //return number of features
     public int numfeatures(){
+        //add +1 since rows cleared is already available after the virtual move!!!
         //TODO: adapt to function above
-        return 0;
+        return (3+1);
     }
 
 

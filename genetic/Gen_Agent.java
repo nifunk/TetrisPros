@@ -3,15 +3,12 @@ package genetic;
 import game.Game;
 import game.Results;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class Gen_Agent {
 
-    private QMatrix q_matrix;
     private Game game;
-    private final double MIN_ALPHA = 0.2;
-    private final double GAMMA     = 1.0;
-    private final double EPS       = 0.2;
 
     public Gen_Agent(Game game) {
         this.game = game;
@@ -21,21 +18,33 @@ public class Gen_Agent {
         //just the function which really does the performance!
         //have a feature weight vector!
         //init reward!
-        int total_reward = 0;
+        double total_reward = 0;
         //STEP1: get all actions
         int all_actions = game.numActions();
-        int best_move = 0;
+        int num_features = game.numfeatures();
+        //feature vector: dim1=action idx; dim2= features to this index
+        double[] weights = new double[]{-0.51,0.76,-0.3566,-0.18448};
+        // Important: have to take measure such that we dont choose illegal move!!
+
         //Need this?! - doubt it
         Results results  = new Results(0, new int[]{0}, false);
 
         while (! results.terminated) {
+            double[] score = new double[all_actions]; //to eval the moves
+            //the higher the score the better so preinit with -10000 so that no illegal moves taken
+            Arrays.fill(score, -100000.0);
         //STEP3: if valid action - play perform the actions virtually and compute the features
             for (int move=0; move<all_actions; move++){
                 if (game.checkAction(move)){
                     Results outcome = game.virtual_move(game.state(),move);
-                    if (outcome.terminated!=true){
-                        best_move = move;
-                        break;
+                    if (outcome.terminated!=true){ //this means game is not over in this drive!
+                        //calculate all features!!!
+                        double[] features = game.features(outcome);
+                        double score_ = 0;
+                        for (int k=0; k<num_features;k++){
+                            score_ = score_ + weights[k]*features[k];
+                        }
+                        score[move] = score_;
                     }
 
                 }
@@ -43,74 +52,27 @@ public class Gen_Agent {
         //STEP4: features * weights
 
         //Step5: choose best move
-
+            double best_score=score[0];
+            int best_move=0;
+            for(int i=1;i<all_actions;i++){
+                if (score[i]>best_score){
+                    best_score = score[i];
+                    best_move = i;
+                }
+            }
         //Step6: execute this best move
             results = game.step(best_move);
         //Step7: save reward such that You know how succesfull these weights were!!
-            total_reward += results.reward;
+            total_reward = results.reward;
         }
-        return total_reward;
+        System.out.println("You have completed "+total_reward+" rows.");
+        return (int)total_reward;
     }
 
     public void adapt(final int iterations) {
         // Initialise learning rates as decreasing with time
         // for better adaption.
-        double[] alphas = new double[iterations];
-        for(int k = 0; k < iterations; ++k) {
-            alphas[k] = 1.0 - (1.0 - MIN_ALPHA)/iterations*k;
-        }
-        // Training periods - Adapt q matrix by exploration.
-        Results current = new Results(0, new int[]{0}, false);
-        for(int k = 0; k < iterations; ++k) {
-            final int action = act(current.state[0]);
-            Results next = game.step(action);
-            q_matrix.adapt(current.state[0], next.state[0],
-                           action, next.reward, alphas[k]);
-            current = next;
-            if (current.terminated) game = game.restart();
-
-            System.out.printf("Finished iteration (%d)\n", k);
-        }
     }
 
-    private int act(final int state) {
-        //here we decide on the next move!!!
-        final Random generator = new Random();
-        //if (generator.nextDouble() < EPS) {
-        //    return generator.nextInt(CTB.num_actions);
-        //} else {
-        //    return q_matrix.bestAction(state);
-        //}
-        return 0;
-    }
 
-    private class QMatrix {
-
-        private double[][] q_matrix;
-
-        private QMatrix(final int num_states, final int num_actions) {
-            q_matrix = new double[num_states][num_actions];
-        }
-
-        private int bestAction(final int state) {
-            final double[] options = q_matrix[state];
-            int best_option        = -1;
-            double max             = Double.NEGATIVE_INFINITY;
-            for (int i = 0; i < options.length; i++) {
-                final double elem = options[i];
-                if (elem > max) {
-                    max = elem;
-                    best_option = i;
-                }
-            }
-            return best_option;
-        }
-
-        private void adapt(final int state, final int next_state,
-                           final int action, final double reward, final double alpha) {
-            final double exp_total_reward = reward + GAMMA*bestAction(next_state);
-            q_matrix[state][action] += alpha*(exp_total_reward - q_matrix[state][action]);
-        }
-
-    }
 }

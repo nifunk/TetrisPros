@@ -32,7 +32,7 @@ public abstract class Game {
 
     // for genetic algorithm
     abstract public Results virtual_move(int[] own_state, int action_index);
-    abstract public double[] features (int[] virtual_state);
+    abstract public double[] features (Results virtual_state_res);
     abstract public int numfeatures();
 
 }
