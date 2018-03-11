@@ -10,6 +10,7 @@ import java.util.Arrays;
 public class Tetris_gen extends Game {
 
     private State state;
+    private boolean visualise_game = false;
 
     public Tetris_gen() {
         // Define game specific variables.
@@ -17,7 +18,7 @@ public class Tetris_gen extends Game {
         // num_actions: each column (10) with each orientation (4)
         // Start super game class.
         state = new State();
-        new TFrame(state);
+        if (visualise_game) activateVisualisation();
     }
 
     @Override
@@ -39,12 +40,14 @@ public class Tetris_gen extends Game {
 
         state.makeMove(des_move[0],des_move[1]);
         // Draw new state and next piece.
-        state.draw();
-        state.drawNext(0,0);
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (visualise_game){
+            state.draw();
+            state.drawNext(0,0);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         return new Results(state.getRowsCleared(), state(), terminal());
     }
@@ -313,5 +316,10 @@ public class Tetris_gen extends Game {
         return (3+1);
     }
 
+    @Override
+    public void activateVisualisation() {
+        visualise_game = true;
+        new TFrame(state);
+    }
 
 }

@@ -15,7 +15,9 @@ public class Player {
 		//for the genetic algorithm:
 		Gen_Agent agent = new Gen_Agent(new Tetris_gen());
 		//let the player act
-		agent.perform();
+		//agent.perform();
+		//let the player learn
+		agent.do_genetic_learning();
 		System.exit(0);
 	}
 	

@@ -35,4 +35,7 @@ public abstract class Game {
     abstract public double[] features (Results virtual_state_res);
     abstract public int numfeatures();
 
+    // Activate visualisation (as initially deactivated).
+    abstract public void activateVisualisation();
+
 }
