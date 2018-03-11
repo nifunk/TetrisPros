@@ -22,7 +22,12 @@ public class QLearning {
     public void perform() {
         game.Results results  = game.initial();
         while (! results.terminated) {
-            results = game.step(act(results.state));
+            final int action = act(results.state);
+            if (game.checkAction(action)) {
+                results = game.step(action);
+            } else {
+                results = new Results(-1000.0, results.state, results.terminated);
+            }
         }
     }
 

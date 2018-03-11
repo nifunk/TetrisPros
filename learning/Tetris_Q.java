@@ -45,13 +45,13 @@ public class Tetris_Q extends Game {
 
     @Override
     public Results step(final int action_index) {
-        final int orient = action_index / (N_STATE - 1);
-        final int slot   = action_index % (N_STATE - 1);
+        final int orient = action_index / State.COLS;
+        final int slot   = action_index % State.COLS;
         state.makeMove(orient, slot);
         // Draw new state and next piece.
         state.draw(); state.drawNext(0,0);
         try {
-            Thread.sleep(10000);
+            Thread.sleep(300);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -75,8 +75,8 @@ public class Tetris_Q extends Game {
 
     @Override
     protected int[] state() {
-        int[] current = Arrays.copyOf(getHighestRow(), N_STATE);
-        current[10]   = state.getNextPiece();
+        int[] current      = Arrays.copyOf(getHighestRow(), N_STATE);
+        current[N_STATE-1] = state.getNextPiece();
         return current;
     }
 
@@ -91,7 +91,12 @@ public class Tetris_Q extends Game {
         for (int height : top) {
             if (height > highest_row) highest_row = height;
         }
-        return state.getField()[State.ROWS - highest_row];
+        int[] return_row = new int[State.COLS];
+        int[][] field    = state.getField();
+        for (int k = 0; k < return_row.length; ++k) {
+            return_row[k] = field[State.ROWS - highest_row][k] != 0 ? 1 : 0;
+        }
+        return return_row;
     }
 
     @Override
@@ -116,8 +121,12 @@ public class Tetris_Q extends Game {
         final int[][] valid     = state.legalMoves();
         final int action_orient = action_index / State.COLS;
         final int action_slot   = action_index % State.COLS;
-        return !(action_orient >= valid.length | action_orient < 0
-                | action_slot >= valid[action_orient].length | action_slot < 0);
+        for (int[] valid_action : valid) {
+            if(valid_action[0] == action_orient && valid_action[1] == action_slot) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
