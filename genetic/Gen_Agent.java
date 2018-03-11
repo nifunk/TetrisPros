@@ -41,6 +41,7 @@ public class Gen_Agent {
                         //calculate all features!!!
                         double[] features = game.features(outcome);
                         double score_ = 0;
+                        //calculate the score
                         for (int k=0; k<num_features;k++){
                             score_ = score_ + weights[k]*features[k];
                         }
@@ -49,7 +50,6 @@ public class Gen_Agent {
 
                 }
             }
-        //STEP4: features * weights
 
         //Step5: choose best move
             double best_score=score[0];
