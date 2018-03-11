@@ -24,18 +24,28 @@ public class Gen_Agent {
         int total_reward = 0;
         //STEP1: get all actions
         int all_actions = game.numActions();
+        int best_move = 0;
         //Need this?! - doubt it
         Results results  = new Results(0, new int[]{0}, false);
 
         while (! results.terminated) {
         //STEP3: if valid action - play perform the actions virtually and compute the features
+            for (int move=0; move<all_actions; move++){
+                if (game.checkAction(move)){
+                    Results outcome = game.virtual_move(game.state(),move);
+                    if (outcome.terminated!=true){
+                        best_move = move;
+                        break;
+                    }
 
+                }
+            }
         //STEP4: features * weights
 
         //Step5: choose best move
 
         //Step6: execute this best move
-            results = game.step(act(results.state[0]));
+            results = game.step(best_move);
         //Step7: save reward such that You know how succesfull these weights were!!
             total_reward += results.reward;
         }

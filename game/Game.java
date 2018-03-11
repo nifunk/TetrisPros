@@ -21,7 +21,7 @@ public abstract class Game {
     abstract protected double reward();
 
     // Internal state, i.e. environment describing integer array.
-    abstract protected int[] state();
+    abstract public int[] state();
     abstract public int toScalarState(final int[] state);
 
     // Definition of game properties.
@@ -31,7 +31,7 @@ public abstract class Game {
     abstract public int numActions();
 
     // for genetic algorithm
-    abstract public Results virtual_move(int[] state);
+    abstract public Results virtual_move(int[] own_state, int action_index);
     abstract public double[] features (int[] virtual_state);
     abstract public int numfeatures();
 
