@@ -1,7 +1,5 @@
 import genetic.Gen_Agent;
 import genetic.Tetris_gen;
-import learning.Tetris_Q;
-import learning.QLearning;
 
 public class Player {
 

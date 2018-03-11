@@ -2,7 +2,6 @@ package genetic;
 
 import game.Game;
 import game.Results;
-import tests.CTB;
 
 import java.util.Random;
 
@@ -16,15 +15,28 @@ public class Gen_Agent {
 
     public Gen_Agent(Game game) {
         this.game = game;
-        q_matrix  = new QMatrix(game.num_states, game.num_actions);
     }
 
     public int perform() {
         //just the function which really does the performance!
+        //have a feature weight vector!
+        //init reward!
         int total_reward = 0;
+        //STEP1: get all actions
+        int all_actions = game.numActions();
+        //Need this?! - doubt it
         Results results  = new Results(0, new int[]{0}, false);
+
         while (! results.terminated) {
-            results       = game.step(act(results.state[0]));
+        //STEP3: if valid action - play perform the actions virtually and compute the features
+
+        //STEP4: features * weights
+
+        //Step5: choose best move
+
+        //Step6: execute this best move
+            results = game.step(act(results.state[0]));
+        //Step7: save reward such that You know how succesfull these weights were!!
             total_reward += results.reward;
         }
         return total_reward;
