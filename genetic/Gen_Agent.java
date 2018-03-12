@@ -35,7 +35,7 @@ public class Gen_Agent {
 
         while (! results.terminated) {
             double[] score = new double[all_actions]; //to eval the moves
-            //the higher the score the better so preinit with -10000 so that no illegal moves taken
+            //the higher positive!! the score the better so preinit with -10000 so that no illegal moves taken
             Arrays.fill(score, -100000.0);
         //STEP3: if valid action - play perform the actions virtually and compute the features
             for (int move=0; move<all_actions; move++){
@@ -79,115 +79,37 @@ public class Gen_Agent {
         //general assumption: feature 0,2,3 must be penalized
         //feature 1 must be pushed -> positive
 
-        int size_init_population = 1000;
+        int size_init_population = 500; //was 1000
         int num_repetitions = 5;
-        Random r = new Random(); //random num generator between 0 and 1;
         double[][]init_population = new double[size_init_population][game.numfeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[]{-25,0,-25,-25};
         double[]weights_upperbound = new double[]{0,25,0,0};
+
+        //generate initial population
         for (int i=0;i<size_init_population;i++){
             for (int j=0; j<game.numfeatures();j++){
-                double random = r.nextDouble();
-                init_population[i][j]=weights_lowerbound[j]+random*(weights_upperbound[j]-weights_lowerbound[j]);
+                init_population[i][j]= getRandom(weights_lowerbound[j],weights_upperbound[j]);
             }
         }
-        System.out.println("Initial popukation generated....");
+        System.out.println("Initial population generated....");
         //play with all the 1000 combinations and store the highest
-        for (int i=0;i<size_init_population;i++) {
-            //set weights in this iteration
-            for (int j = 0; j < game.numfeatures(); j++) {
-                this.weights[j] = init_population[i][j];
-            }
-            //play num_repetition times
-            double[] store_score = new double[num_repetitions];
-            for (int j = 0; j < num_repetitions; j++) {
-                store_score[j] = this.perform();
-            }
-            //store the best value!
-            double score_best = store_score[0];
-            for (int j = 1; j < num_repetitions; j++) {
-                if (store_score[j] > score_best) {
-                    score_best = store_score[j];
-                }
-            }
-            init_population[i][game.numfeatures()] = score_best;
-        }
-        //Sort descending!!
-        sortbyColumn(init_population,game.numfeatures());
-        System.out.println("Initial popukation succesfull evaluated");
+        init_population = evalPopulation(init_population,num_repetitions);
+
+        System.out.println("Initial population succesfully evaluated");
 
         //STEP2: choose the best ones -> selection
-        int tokeep = 50; //must be smaller than init population!!!
-        int num_new_generated = 400; //MUST be able to divide by 2!!!
-        double[][]selected_population = new double[num_new_generated][game.numfeatures()+1];
+        double tokeep = 0.1; //percentage of initial population you want to keep, must be smaller than 1!!!
+        double size_new_pop = 0.3; //size of new population relative to initial population (should be smaller than 0.5)
+        //reason: is twice this percentage later cause cross over is mutual -> real percentace = 2*size_new_pop
         double prop_mutation = 0.1;
 
-        //STEP3: crossover
-        for (int i=0;i<num_new_generated;i=i+2) {
-            //determine which ones to cross
-            double random = r.nextDouble();
-            int weightset1 = (int) (random * tokeep);
-            random = r.nextDouble();
-            int weightset2 = (int) (random * tokeep);
-            //determine crossover point which is here!!
-            random = r.nextDouble();
-            int crossover = (int) (1 + random * (game.numfeatures() - 2));
-            for (int k = 0; k < game.numfeatures(); k++) {
-                if (k >= crossover) {
-                    selected_population[i][k] = init_population[weightset1][k];
-                    selected_population[i + 1][k] = init_population[weightset2][k];
-                } else {
-                    selected_population[i][k] = init_population[weightset2][k];
-                    selected_population[i + 1][k] = init_population[weightset2][k];
-                }
-
-            }
-
-            //possible mutation:
-            random = r.nextDouble();
-            if (random < prop_mutation) {
-                //determine point of mutation:
-                random = r.nextDouble();
-                int pos_mutation = (int) (random * (game.numfeatures() - 1));
-                //new value
-                random = r.nextDouble();
-                selected_population[i][pos_mutation] = weights_lowerbound[pos_mutation] + random * (weights_upperbound[pos_mutation] - weights_lowerbound[pos_mutation]);
-            }
-
-            //possible mutation:
-            random = r.nextDouble();
-            if (random < prop_mutation) {
-                //determine point of mutation:
-                random = r.nextDouble();
-                int pos_mutation = (int) (random * (game.numfeatures() - 1));
-                //new value
-                random = r.nextDouble();
-                selected_population[i + 1][pos_mutation] = weights_lowerbound[pos_mutation] + random * (weights_upperbound[pos_mutation] - weights_lowerbound[pos_mutation]);
-            }
-        }
+        //STEP3: crossover and mutation
+        double[][] selected_population = doCrossingandMutation(init_population,tokeep,size_new_pop,prop_mutation,weights_lowerbound,weights_upperbound);
         System.out.println("Selected population created....");
+
         //play with all the combinations and store the highest
-        for (int i=0;i<num_new_generated;i++) {
-            //set weights in this iteration
-            for (int j = 0; j < game.numfeatures(); j++) {
-                this.weights[j] = selected_population[i][j];
-            }
-            //play num_repetition times
-            double[] store_score = new double[num_repetitions];
-            for (int j = 0; j < num_repetitions; j++) {
-                store_score[j] = this.perform();
-            }
-            //store the best value!
-            double score_best = store_score[0];
-            for (int j = 1; j < num_repetitions; j++) {
-                if (store_score[j] > score_best) {
-                    score_best = store_score[j];
-                }
-            }
-            selected_population[i][game.numfeatures()] = score_best;
-        }
-        //Sort descending!!
-        sortbyColumn(selected_population,game.numfeatures());
+        selected_population = evalPopulation(selected_population,num_repetitions);
+
         System.out.println("Selected population succesfully evaluated!");
 
 
@@ -204,6 +126,7 @@ public class Gen_Agent {
         // for better adaption.
     }
 
+    //function which allows to sort 2D array by one column in descending order!
     public static void sortbyColumn(double arr[][], int col)
     {
         // Using built-in sort function Arrays.sort
@@ -223,6 +146,88 @@ public class Gen_Agent {
                     return 1;
             }
         });  // End of function call sort().
+    }
+
+    //function which returns a random number inside the interval [lower_bound,upper_bound]
+    private double getRandom(double lower_bound,double upper_bound){
+        Random r = new Random();
+        double random = r.nextDouble();
+        return (lower_bound+random*(upper_bound-lower_bound));
+    }
+
+    //given a population, execute the game with it and store the results in the resulting array!
+    //return: in descending order sorted array!
+    private double[][] evalPopulation(double[][] population, int num_repetitions){
+        int size_population = population.length;
+        for (int i=0;i<size_population;i++) {
+            //set weights in this iteration
+            for (int j = 0; j < game.numfeatures(); j++) {
+                this.weights[j] = population[i][j];
+            }
+            //play num_repetition times
+            double[] store_score = new double[num_repetitions];
+            for (int j = 0; j < num_repetitions; j++) {
+                store_score[j] = this.perform();
+            }
+            //IMPLEMENTATION HERE: STORE BEST VALUE!
+            double score_best = store_score[0];
+            for (int j = 1; j < num_repetitions; j++) {
+                if (store_score[j] > score_best) {
+                    score_best = store_score[j];
+                }
+            }
+            population[i][game.numfeatures()] = score_best;
+        }
+        //Sort descending by the score!
+        sortbyColumn(population,game.numfeatures());
+        return population;
+    }
+
+    //expects: population that we want to mutate and cross which is ordered descendingly!!!
+    //to_keep = percentage of population we want to use for crossover
+    //size_new: how big should new population be in percent of initial!!!
+    //prop_mutation = propability for a possible mutation
+    //weights intervals needed for the possible mutation!
+    //returns: new crossed and mutated array!!
+    private double[][] doCrossingandMutation(double[][]input_population,double to_keep,double size_new, double prop_mutation, double[] weigths_lower, double[] weights_upper){
+        int size_input = input_population.length;
+        int num_new_generated = 2*(int) Math.round(size_input*size_new); //since crossing over is mutual*2
+        int last_idx = (int) Math.round(size_input*to_keep); //last index of input array we consider!!!
+        double[][]new_population = new double[num_new_generated][game.numfeatures()+1];
+        for (int i=0;i<num_new_generated;i=i+2) {
+            //determine which ones to cross
+            int candidate1 = (int) Math.round(getRandom(0,last_idx)); //round is essential since (int)9.8=9!!!
+            int candidate2 = (int) Math.round(getRandom(0,last_idx));
+            //determine crossover point
+            int crossover = (int) Math.round(getRandom(1,game.numfeatures()-1));
+            for (int k = 0; k < game.numfeatures(); k++) {
+                if (k >= crossover) {
+                    new_population[i][k] = input_population[candidate1][k];
+                    new_population[i + 1][k] = input_population[candidate2][k];
+                } else {
+                    new_population[i][k] = input_population[candidate2][k];
+                    new_population[i + 1][k] = input_population[candidate1][k];
+                }
+
+            }
+
+            //possible mutation:
+            if (getRandom(0,1) < prop_mutation) {
+                //determine point of mutation:
+                int pos_mutation = (int) Math.round(getRandom(0,game.numfeatures()-1));
+                //new value
+                new_population[i][pos_mutation] = getRandom(weigths_lower[pos_mutation],weights_upper[pos_mutation]);
+            }
+
+            //possible mutation:
+            if (getRandom(0,1) < prop_mutation) {
+                //determine point of mutation:
+                int pos_mutation = (int) Math.round(getRandom(0,game.numfeatures()-1));
+                //new value
+                new_population[i+1][pos_mutation] = getRandom(weigths_lower[pos_mutation],weights_upper[pos_mutation]);
+            }
+        }
+        return new_population;
     }
 
 }
