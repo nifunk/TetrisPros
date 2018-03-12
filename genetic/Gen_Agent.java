@@ -3,8 +3,12 @@ package genetic;
 import game.Game;
 import game.Results;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Random;
 
 public class Gen_Agent {
@@ -113,7 +117,11 @@ public class Gen_Agent {
         System.out.println("Selected population succesfully evaluated!");
 
 
-        //TODO: maybe fuse selected_population and init_population to get the really best!!
+        //Fuse selected_population and init_population to get the really best!!
+        int entries = 10; //store the 10 best overall!!!
+        double [][]final_result = fuseMatrix(init_population,selected_population,entries);
+        String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
+        storeMatrix(fileName,final_result);
 
         System.out.println("You have completed "+selected_population[0][game.numfeatures()]+" rows.");
         //BEST WEIGHTS:
@@ -121,6 +129,8 @@ public class Gen_Agent {
     return new double[]{1};
 
     }
+
+
     public void adapt(final int iterations) {
         // Initialise learning rates as decreasing with time
         // for better adaption.
@@ -169,13 +179,23 @@ public class Gen_Agent {
             for (int j = 0; j < num_repetitions; j++) {
                 store_score[j] = this.perform();
             }
-            //IMPLEMENTATION HERE: STORE BEST VALUE!
+
             double score_best = store_score[0];
+
+            //HERE: store BEST SCORE VALUE!
+            //for (int j = 1; j < num_repetitions; j++) {
+            //    if (store_score[j] > score_best) {
+            //        score_best = store_score[j];
+            //    }
+            //}
+
+            //OR: store the MEAN of all scores:
             for (int j = 1; j < num_repetitions; j++) {
-                if (store_score[j] > score_best) {
-                    score_best = store_score[j];
-                }
+                score_best = score_best + store_score[j];
             }
+            score_best = score_best/num_repetitions;
+
+
             population[i][game.numfeatures()] = score_best;
         }
         //Sort descending by the score!
@@ -228,6 +248,55 @@ public class Gen_Agent {
             }
         }
         return new_population;
+    }
+
+    //this method fuses two matrices to get the best results!!!
+    //num_entries == number entries the final matrix should have!!
+    public double[][]fuseMatrix(double[][]matrix1,double[][]matrix2,int num_entries){
+        int lenght1 = Math.min(matrix1.length,num_entries);
+        int length2 = Math.min(matrix2.length,num_entries);
+        double[][] final_arr = new double[(lenght1+length2)][game.numfeatures()+1];
+        for (int i=0; i<lenght1;i++){
+            for (int j=0;j<game.numfeatures()+1;j++){
+                final_arr [i][j]=matrix1[i][j];
+            }
+        }
+        for (int i=0; i<length2;i++){
+            for (int j=0;j<game.numfeatures()+1;j++){
+                final_arr [i+lenght1][j]=matrix2[i][j];
+            }
+        }
+        sortbyColumn(final_arr,game.numfeatures());
+        //shrink to desired size!!
+        int des_size = Math.max(lenght1,length2); //only that there are no access errors!!!
+        double[][]return_arr = new double[des_size][game.numfeatures()+1];
+        for (int i=0; i<des_size;i++){
+            for (int j=0;j<game.numfeatures()+1;j++){
+                return_arr[i][j]=final_arr[i][j];
+            }
+        }
+        return return_arr;
+    }
+
+
+    public void storeMatrix(final String filename, double[][]matrix) {
+        try {
+            final FileWriter fw = new FileWriter(filename);
+            fw.write(getCurrentTimeStamp());
+            fw.write("\n");
+            for (double[] action_rewards : matrix) {
+                for (double reward : action_rewards) {
+                    fw.write(reward + ",");
+                }
+                fw.write("\n");
+            }
+            fw.close();
+        } catch (IOException e) { e.printStackTrace(); }
+        System.out.println("Stored Best Results in " + filename);
+    }
+
+    public String getCurrentTimeStamp() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
     }
 
 }
