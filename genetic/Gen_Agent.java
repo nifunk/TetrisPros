@@ -123,9 +123,9 @@ public class Gen_Agent {
         String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
         storeMatrix(fileName,final_result);
 
-        System.out.println("You have completed "+selected_population[0][game.numfeatures()]+" rows.");
+        System.out.println("You have completed "+final_result[0][game.numfeatures()]+" rows.");
         //BEST WEIGHTS:
-        System.out.println(Arrays.toString(selected_population[0]));
+        System.out.println(Arrays.toString(final_result[0]));
     return new double[]{1};
 
     }
