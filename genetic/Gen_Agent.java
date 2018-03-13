@@ -84,7 +84,7 @@ public class Gen_Agent {
         //feature 1 must be pushed -> positive
 
         int size_init_population = 500; //was 1000
-        int num_repetitions = 10;
+        int num_repetitions = 5;
         double[][]init_population = new double[size_init_population][game.numfeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[]{-40,0,-40,-40};
         double[]weights_upperbound = new double[]{0,40,0,0};
