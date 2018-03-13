@@ -2,7 +2,7 @@
 cd ..
 rm -r build
 mkdir build
-javac CTBPlayer.java -d build/
+javac tests/CTBPlayer.java -d build/
 cd build
 java CTBPlayer
 cd ../scripts
