@@ -84,10 +84,10 @@ public class Gen_Agent {
         //feature 1 must be pushed -> positive
 
         int size_init_population = 500; //was 1000
-        int num_repetitions = 5;
+        int num_repetitions = 10;
         double[][]init_population = new double[size_init_population][game.numfeatures()+1]; //1000 init weights,... store weights and score
-        double[]weights_lowerbound = new double[]{-25,0,-25,-25};
-        double[]weights_upperbound = new double[]{0,25,0,0};
+        double[]weights_lowerbound = new double[]{-40,0,-40,-40};
+        double[]weights_upperbound = new double[]{0,40,0,0};
 
         //generate initial population
         for (int i=0;i<size_init_population;i++){
@@ -102,7 +102,7 @@ public class Gen_Agent {
         System.out.println("Initial population succesfully evaluated");
 
         //STEP2: choose the best ones -> selection
-        double tokeep = 0.1; //percentage of initial population you want to keep, must be smaller than 1!!!
+        double tokeep = 0.05; //percentage of initial population you want to keep, must be smaller than 1!!!
         double size_new_pop = 0.3; //size of new population relative to initial population (should be smaller than 0.5)
         //reason: is twice this percentage later cause cross over is mutual -> real percentace = 2*size_new_pop
         double prop_mutation = 0.1;
