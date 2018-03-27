@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="encog">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dependencies/encog.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
