@@ -27,13 +27,10 @@ public class CTB extends Game {
 
     @Override
     public Results step(final int action) {
-        state.update(actions()[action]);
+        state.update(actions()[action][0]);
         if (visualise_game) panel.repaint();
         return new Results(reward(), state(), terminal());
     }
-
-    @Override
-    public Results initial(){return new Results(reward(), state(), terminal());}
 
     @Override
     protected boolean terminal() {
@@ -56,7 +53,8 @@ public class CTB extends Game {
     }
 
     @Override
-    public Game restart() {
+    public Game restart()
+    {
         CTB new_game = new CTB();
         if (visualise_game) {
             frame.setVisible(false);
@@ -67,12 +65,16 @@ public class CTB extends Game {
     }
 
     @Override
-    public int[] actions() {
-        return new int[]{-CTBConstants.catcher_speed, 0, +CTBConstants.catcher_speed};
+    public int[][] actions()
+    {
+        int[][] actions = new int[1][];
+        actions[0]    = new int[]{-CTBConstants.catcher_speed, 0, +CTBConstants.catcher_speed};
+        return actions;
     }
 
     @Override
-    public boolean checkAction(final int action_index) {
+    public boolean checkAction(final int action_index)
+    {
         final int x = state.catcher_pos.x;
         if (action_index == 2 && x >= CTBConstants.window_width - CTBConstants.catcher_speed*2
             || action_index == 0 && x <= CTBConstants.catcher_speed*2) {
@@ -84,21 +86,6 @@ public class CTB extends Game {
     @Override
     public int numStates() {
         return 2*CTBConstants.window_width;
-    }
-
-    @Override
-    public int numActions() {
-        return actions().length;
-    }
-
-    @Override
-    public void activateVisualisation(){
-        //nothing,...
-    }
-
-    @Override
-    public int numStates() {
-        return (int) Math.pow(2, 10) * 7;
     }
 
     @Override
@@ -120,15 +107,6 @@ public class CTB extends Game {
     public int numfeatures() {
         return 0;
     }
-
-    @Override
-    public boolean checkAction(final int action_index){return false;}
-
-    @Override
-    public int[][] actions(){return new int[1][1];}
-
-    @Override
-    public int toScalarState(final int[] state){return 0;}
 
     private class Panel extends JPanel {
 

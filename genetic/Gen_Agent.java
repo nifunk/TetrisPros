@@ -137,7 +137,7 @@ public class Gen_Agent {
     }
 
     //function which allows to sort 2D array by one column in descending order!
-    public static void sortbyColumn(double arr[][], int col)
+    public static void sortbyColumn(double arr[][], final int col)
     {
         // Using built-in sort function Arrays.sort
         //sorting descending!!!

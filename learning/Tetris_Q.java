@@ -69,9 +69,6 @@ public class Tetris_Q extends Game
     }
 
     @Override
-    public Results initial(){return new Results(reward(), state(), terminal());}
-
-    @Override
     protected boolean terminal() {
         return state.hasLost();
     }
@@ -82,7 +79,7 @@ public class Tetris_Q extends Game
     }
 
     @Override
-    protected int[] state()
+    public int[] state()
     {
         int[] current      = Arrays.copyOf(getHighestRow(), N_STATE);
         current[N_STATE-1] = state.getNextPiece();
@@ -117,14 +114,16 @@ public class Tetris_Q extends Game
     public Game restart() { return new Tetris_Q(); }
 
     @Override
-    public int[] actions()
+    public int[][] actions()
     {
-        int[] actions = new int[numActions()];
-        for(int orient = 0; orient < 4; ++orient)
-            for(int slot = 0; slot < State.COLS; ++slot) {
-                final int action_index = orient*State.COLS+slot;
-                actions[action_index]  = action_index;
+        int i = 0;
+        int[][]actions = new int [numActions()][2];
+        for (int orient = 0; orient < 4; ++orient) {
+            for (int slot = 0; slot < State.COLS; ++slot) {
+                actions[i] = new int[]{orient,slot};
+                i++;
             }
+        }
         return actions;
     }
 
@@ -156,26 +155,6 @@ public class Tetris_Q extends Game
     }
 
     @Override
-    public int[][] actions() {
-        return new int[1][1];
-    }
-
-    @Override
-    public boolean checkAction(final int action_index) {
-        return true;
-    }
-
-    @Override
-    public int numStates() {
-        return (int) Math.pow(2, 10) * 7;
-    }
-
-    @Override
-    public int numActions() {
-        return 40;
-    }
-
-    @Override
     public Results virtual_move(int[] own_state, int action_index) {
         return new Results(reward(), state(), terminal());
     }
@@ -190,11 +169,4 @@ public class Tetris_Q extends Game
         return 0;
     }
 
-    @Override
-    public void activateVisualisation() {
-        int a = 0;
-    }//do noting
-
-    @Override
-    public int toScalarState(final int[] state){return 0;}
 }

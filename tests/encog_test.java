@@ -14,21 +14,11 @@ import org.encog.Encog;
 
 public class encog_test {
 
-    /**
-     * The input necessary for XOR.
-     */
     public static double XOR_INPUT[][] = { { 0.0, 0.0 }, { 1.0, 0.0 },
             { 0.0, 1.0 }, { 1.0, 1.0 } };
 
-    /**
-     * The ideal data necessary for XOR.
-     */
     public static double XOR_IDEAL[][] = { { 0.0 }, { 1.0 }, { 1.0 }, { 0.0 } };
 
-    /**
-     * The main method.
-     * @param args No arguments are used.
-     */
     public static void main(final String args[]) {
 
         // create a neural network, without using a factory
