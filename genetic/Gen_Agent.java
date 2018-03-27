@@ -29,7 +29,7 @@ public class Gen_Agent {
         double total_reward = 0;
         //STEP1: get all actions
         int all_actions = game.numActions();
-        int num_features = game.numfeatures();
+        int num_features = game.numFeatures();
         //feature vector: dim1=action idx; dim2= features to this index
         double[] weights_ = this.weights;
         // Important: have to take measure such that we dont choose illegal move!!
@@ -85,13 +85,13 @@ public class Gen_Agent {
 
         int size_init_population = 500; //was 1000
         int num_repetitions = 10;
-        double[][]init_population = new double[size_init_population][game.numfeatures()+1]; //1000 init weights,... store weights and score
+        double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[]{-40,0,-40,-40};
         double[]weights_upperbound = new double[]{0,40,0,0};
 
         //generate initial population
         for (int i=0;i<size_init_population;i++){
-            for (int j=0; j<game.numfeatures();j++){
+            for (int j = 0; j<game.numFeatures(); j++){
                 init_population[i][j]= getRandom(weights_lowerbound[j],weights_upperbound[j]);
             }
         }
@@ -123,7 +123,7 @@ public class Gen_Agent {
         String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
         storeMatrix(fileName,final_result);
 
-        System.out.println("You have completed "+final_result[0][game.numfeatures()]+" rows.");
+        System.out.println("You have completed "+final_result[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
         System.out.println(Arrays.toString(final_result[0]));
     return new double[]{1};
@@ -171,7 +171,7 @@ public class Gen_Agent {
         int size_population = population.length;
         for (int i=0;i<size_population;i++) {
             //set weights in this iteration
-            for (int j = 0; j < game.numfeatures(); j++) {
+            for (int j = 0; j < game.numFeatures(); j++) {
                 this.weights[j] = population[i][j];
             }
             //play num_repetition times
@@ -196,10 +196,10 @@ public class Gen_Agent {
             score_best = score_best/num_repetitions;
 
 
-            population[i][game.numfeatures()] = score_best;
+            population[i][game.numFeatures()] = score_best;
         }
         //Sort descending by the score!
-        sortbyColumn(population,game.numfeatures());
+        sortbyColumn(population,game.numFeatures());
         return population;
     }
 
@@ -213,14 +213,14 @@ public class Gen_Agent {
         int size_input = input_population.length;
         int num_new_generated = 2*(int) Math.round(size_input*size_new); //since crossing over is mutual*2
         int last_idx = (int) Math.round(size_input*to_keep); //last index of input array we consider!!!
-        double[][]new_population = new double[num_new_generated][game.numfeatures()+1];
+        double[][]new_population = new double[num_new_generated][game.numFeatures()+1];
         for (int i=0;i<num_new_generated;i=i+2) {
             //determine which ones to cross
             int candidate1 = (int) Math.round(getRandom(0,last_idx)); //round is essential since (int)9.8=9!!!
             int candidate2 = (int) Math.round(getRandom(0,last_idx));
             //determine crossover point
-            int crossover = (int) Math.round(getRandom(1,game.numfeatures()-1));
-            for (int k = 0; k < game.numfeatures(); k++) {
+            int crossover = (int) Math.round(getRandom(1,game.numFeatures()-1));
+            for (int k = 0; k < game.numFeatures(); k++) {
                 if (k >= crossover) {
                     new_population[i][k] = input_population[candidate1][k];
                     new_population[i + 1][k] = input_population[candidate2][k];
@@ -234,7 +234,7 @@ public class Gen_Agent {
             //possible mutation:
             if (getRandom(0,1) < prop_mutation) {
                 //determine point of mutation:
-                int pos_mutation = (int) Math.round(getRandom(0,game.numfeatures()-1));
+                int pos_mutation = (int) Math.round(getRandom(0,game.numFeatures()-1));
                 //new value
                 new_population[i][pos_mutation] = getRandom(weigths_lower[pos_mutation],weights_upper[pos_mutation]);
             }
@@ -242,7 +242,7 @@ public class Gen_Agent {
             //possible mutation:
             if (getRandom(0,1) < prop_mutation) {
                 //determine point of mutation:
-                int pos_mutation = (int) Math.round(getRandom(0,game.numfeatures()-1));
+                int pos_mutation = (int) Math.round(getRandom(0,game.numFeatures()-1));
                 //new value
                 new_population[i+1][pos_mutation] = getRandom(weigths_lower[pos_mutation],weights_upper[pos_mutation]);
             }
@@ -255,23 +255,23 @@ public class Gen_Agent {
     public double[][]fuseMatrix(double[][]matrix1,double[][]matrix2,int num_entries){
         int lenght1 = Math.min(matrix1.length,num_entries);
         int length2 = Math.min(matrix2.length,num_entries);
-        double[][] final_arr = new double[(lenght1+length2)][game.numfeatures()+1];
+        double[][] final_arr = new double[(lenght1+length2)][game.numFeatures()+1];
         for (int i=0; i<lenght1;i++){
-            for (int j=0;j<game.numfeatures()+1;j++){
+            for (int j = 0; j<game.numFeatures()+1; j++){
                 final_arr [i][j]=matrix1[i][j];
             }
         }
         for (int i=0; i<length2;i++){
-            for (int j=0;j<game.numfeatures()+1;j++){
+            for (int j = 0; j<game.numFeatures()+1; j++){
                 final_arr [i+lenght1][j]=matrix2[i][j];
             }
         }
-        sortbyColumn(final_arr,game.numfeatures());
+        sortbyColumn(final_arr,game.numFeatures());
         //shrink to desired size!!
         int des_size = Math.max(lenght1,length2); //only that there are no access errors!!!
-        double[][]return_arr = new double[des_size][game.numfeatures()+1];
+        double[][]return_arr = new double[des_size][game.numFeatures()+1];
         for (int i=0; i<des_size;i++){
-            for (int j=0;j<game.numfeatures()+1;j++){
+            for (int j = 0; j<game.numFeatures()+1; j++){
                 return_arr[i][j]=final_arr[i][j];
             }
         }

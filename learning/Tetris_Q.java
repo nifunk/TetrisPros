@@ -165,7 +165,7 @@ public class Tetris_Q extends Game
     }
 
     @Override
-    public int numfeatures() {
+    public int numFeatures() {
         return 0;
     }
 

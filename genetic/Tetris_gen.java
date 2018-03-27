@@ -310,7 +310,7 @@ public class Tetris_gen extends Game {
     }
 
     //return number of features
-    public int numfeatures(){
+    public int numFeatures(){
         //add +1 since rows cleared is already available after the virtual move!!!
         //TODO: adapt to function above
         return (3+1);

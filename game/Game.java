@@ -34,7 +34,7 @@ public abstract class Game {
     // for genetic algorithm
     abstract public Results virtual_move(int[] own_state, int action_index);
     abstract public double[] features (Results virtual_state_res);
-    abstract public int numfeatures();
+    abstract public int numFeatures();
   
     // Activate visualisation (as initially deactivated).
     abstract public void activateVisualisation();

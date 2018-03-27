@@ -36,6 +36,7 @@ public class QLearning
                 results = game.step(action);
             } else {
                 results = new Results(-1000.0, results.state, results.terminated);
+                results.terminated = true;
             }
             if (results.terminated)
             {
@@ -51,9 +52,8 @@ public class QLearning
         // Initialise learning rates as decreasing with time
         // for better adaption.
         double[] alphas = new double[iterations];
-        for(int k = 0; k < iterations; ++k) {
+        for(int k = 0; k < iterations; ++k)
             alphas[k] = 1.0 - (1.0 - MIN_ALPHA)/iterations*k;
-        }
         // Training periods - Adapt q matrix by exploration.
         Results current = game.initial();
         Results next;
@@ -92,7 +92,8 @@ public class QLearning
 
         private double[][] q_matrix;
 
-        private QMatrix(final int num_states, final int num_actions) {
+        private QMatrix(final int num_states, final int num_actions)
+        {
             q_matrix = new double[num_states][num_actions];
         }
 

@@ -16,7 +16,8 @@ public class CTB extends Game {
 
     private boolean visualise_game = false;
 
-    public CTB() {
+    public CTB()
+    {
         if (visualise_game) activateVisualisation();
     }
 
@@ -26,8 +27,9 @@ public class CTB extends Game {
     }
 
     @Override
-    public Results step(final int action) {
-        state.update(actions()[action][0]);
+    public Results step(final int action)
+    {
+        state.update(actions()[0][action]);
         if (visualise_game) panel.repaint();
         return new Results(reward(), state(), terminal());
     }
@@ -56,7 +58,8 @@ public class CTB extends Game {
     public Game restart()
     {
         CTB new_game = new CTB();
-        if (visualise_game) {
+        if (visualise_game)
+        {
             frame.setVisible(false);
             frame.dispose();
             new_game.activateVisualisation();
@@ -77,10 +80,8 @@ public class CTB extends Game {
     {
         final int x = state.catcher_pos.x;
         if (action_index == 2 && x >= CTBConstants.window_width - CTBConstants.catcher_speed*2
-            || action_index == 0 && x <= CTBConstants.catcher_speed*2) {
-            return false;
-        }
-        return 0 <= action_index && action_index < 3;
+            || action_index == 0 && x <= CTBConstants.catcher_speed*2) { return false; }
+        return 0 <= action_index && action_index < numActions();
     }
 
     @Override
@@ -89,31 +90,30 @@ public class CTB extends Game {
     }
 
     @Override
-    public int numActions() {
-        return 40;
-    }
+    public int numActions() { return 3; }
 
     @Override
-    public Results virtual_move(int[] own_state, int action_index) {
+    public Results virtual_move(int[] own_state, int action_index)
+    {
         return new Results(reward(), state(), terminal());
     }
 
     @Override
-    public double[] features(Results virtual_state_res) {
+    public double[] features(Results virtual_state_res)
+    {
         return new double[]{0};
     }
 
     @Override
-    public int numfeatures() {
-        return 0;
-    }
+    public int numFeatures() { return 0; }
 
     private class Panel extends JPanel {
 
         private Panel() {}
 
         @Override
-        protected void paintComponent(Graphics g) {
+        protected void paintComponent(Graphics g)
+        {
             super.paintComponent(g);
             g.setColor(Color.RED);
             g.fillOval(state.ball_pos.x, state.ball_pos.y - CTBConstants.ball_radius,
@@ -123,7 +123,8 @@ public class CTB extends Game {
         }
 
         @Override
-        public void repaint() {
+        public void repaint()
+        {
             super.repaint();
             try {
                 Thread.sleep(CTBConstants.frame_delay);
@@ -134,7 +135,8 @@ public class CTB extends Game {
     }
 
     @Override
-    public void activateVisualisation() {
+    public void activateVisualisation()
+    {
         visualise_game = true;
         frame = new JFrame("Catch the Ball !");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
