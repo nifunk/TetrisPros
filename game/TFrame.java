@@ -20,7 +20,7 @@ public class TFrame extends JFrame implements KeyListener{
 	public static final int MANUAL = 0;
 	public static final int NONE = 1;
 	
-	public int mode = MANUAL;
+	public int mode = NONE;
 	
 	//constructor
 	public TFrame (State s){

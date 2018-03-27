@@ -25,8 +25,7 @@ public class State {
 	//number of next piece
 	protected int nextPiece;
 	
-	
-	
+
 	//all legal moves - first index is piece type - then a list of 2-length arrays
 	protected static int[][][] legalMoves = new int[N_PIECES][][];
 	
