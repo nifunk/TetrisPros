@@ -158,5 +158,4 @@ public class QLearning
             System.out.println("Loaded Q Matrix in " + filename);
         }
     }
-
 }

@@ -69,6 +69,9 @@ public class Tetris_Q extends Game
     }
 
     @Override
+    public Results initial(){return new Results(reward(), state(), terminal());}
+
+    @Override
     protected boolean terminal() {
         return state.hasLost();
     }
@@ -152,4 +155,46 @@ public class Tetris_Q extends Game
         new TFrame(state);
     }
 
+    @Override
+    public int[][] actions() {
+        return new int[1][1];
+    }
+
+    @Override
+    public boolean checkAction(final int action_index) {
+        return true;
+    }
+
+    @Override
+    public int numStates() {
+        return (int) Math.pow(2, 10) * 7;
+    }
+
+    @Override
+    public int numActions() {
+        return 40;
+    }
+
+    @Override
+    public Results virtual_move(int[] own_state, int action_index) {
+        return new Results(reward(), state(), terminal());
+    }
+
+    @Override
+    public double[] features(Results virtual_state_res) {
+        return new double[]{0};
+    }
+
+    @Override
+    public int numfeatures() {
+        return 0;
+    }
+
+    @Override
+    public void activateVisualisation() {
+        int a = 0;
+    }//do noting
+
+    @Override
+    public int toScalarState(final int[] state){return 0;}
 }

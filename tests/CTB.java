@@ -33,6 +33,9 @@ public class CTB extends Game {
     }
 
     @Override
+    public Results initial(){return new Results(reward(), state(), terminal());}
+
+    @Override
     protected boolean terminal() {
         return state.ball_pos.y > CTBConstants.window_height;
     }
@@ -43,7 +46,7 @@ public class CTB extends Game {
     }
 
     @Override
-    protected int[] state() {
+    public int[] state() {
         return new int[]{state.catcher_pos.x - state.ball_pos.x + CTBConstants.window_width};
     }
 
@@ -88,6 +91,45 @@ public class CTB extends Game {
         return actions().length;
     }
 
+    @Override
+    public void activateVisualisation(){
+        //nothing,...
+    }
+
+    @Override
+    public int numStates() {
+        return (int) Math.pow(2, 10) * 7;
+    }
+
+    @Override
+    public int numActions() {
+        return 40;
+    }
+
+    @Override
+    public Results virtual_move(int[] own_state, int action_index) {
+        return new Results(reward(), state(), terminal());
+    }
+
+    @Override
+    public double[] features(Results virtual_state_res) {
+        return new double[]{0};
+    }
+
+    @Override
+    public int numfeatures() {
+        return 0;
+    }
+
+    @Override
+    public boolean checkAction(final int action_index){return false;}
+
+    @Override
+    public int[][] actions(){return new int[1][1];}
+
+    @Override
+    public int toScalarState(final int[] state){return 0;}
+
     private class Panel extends JPanel {
 
         private Panel() {}
@@ -97,9 +139,9 @@ public class CTB extends Game {
             super.paintComponent(g);
             g.setColor(Color.RED);
             g.fillOval(state.ball_pos.x, state.ball_pos.y - CTBConstants.ball_radius,
-                       CTBConstants.ball_radius * 2, CTBConstants.ball_radius * 2);
+                    CTBConstants.ball_radius * 2, CTBConstants.ball_radius * 2);
             g.fillRect(state.catcher_pos.x, state.catcher_pos.y,
-                       CTBConstants.ball_radius*2, 10);
+                    CTBConstants.ball_radius*2, 10);
         }
 
         @Override
