@@ -132,7 +132,7 @@ public class Gen_Agent {
 
 
     public void adapt(final int iterations) {
-        // Initialise learning rates as decreasing with time
+        // Initialise qlearning rates as decreasing with time
         // for better adaption.
     }
 

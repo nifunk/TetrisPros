@@ -6,9 +6,11 @@ import game.Results;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Random;
 import javax.swing.*;
 
-public class CTB extends Game {
+public class CTB extends Game
+{
 
     private CTBState state = new CTBState();
     private Panel panel    = new Panel();
@@ -22,9 +24,7 @@ public class CTB extends Game {
     }
 
     @Override
-    public Results initial() {
-        return new Results(0.0, new int[]{0}, false);
-    }
+    public Results initial() { return new Results(0.0, state(), false); }
 
     @Override
     public Results step(final int action)
@@ -45,13 +45,15 @@ public class CTB extends Game {
     }
 
     @Override
-    public int[] state() {
-        return new int[]{state.catcher_pos.x - state.ball_pos.x + CTBConstants.window_width};
-    }
+    public int[] state()
+    {
+        int[] state_array  = new int[numStates()];
+        state_array[state.catcher_pos.x]                          = 1;
+        state_array[CTBConstants.window_width + state.ball_pos.x] = 1;
 
-    @Override
-    public int toScalarState(final int[] state) {
-        return Math.max(state[0], 0);
+        System.out.printf("Catcher = %d, Ball = %d\n", state.catcher_pos.x, state.ball_pos.x);
+
+        return state_array;
     }
 
     @Override
@@ -79,13 +81,15 @@ public class CTB extends Game {
     public boolean checkAction(final int action_index)
     {
         final int x = state.catcher_pos.x;
-        if (action_index == 2 && x >= CTBConstants.window_width - CTBConstants.catcher_speed*2
-            || action_index == 0 && x <= CTBConstants.catcher_speed*2) { return false; }
-        return 0 <= action_index && action_index < numActions();
+        return (0 <= action_index && action_index < numActions()) &&
+                ((action_index == 1)
+                 || (action_index == 2 && x <= CTBConstants.window_width - CTBConstants.catcher_speed*2)
+                 || (action_index == 0 && x >= CTBConstants.catcher_speed*2));
     }
 
     @Override
-    public int numStates() {
+    public int numStates()
+    {
         return 2*CTBConstants.window_width;
     }
 
@@ -107,7 +111,8 @@ public class CTB extends Game {
     @Override
     public int numFeatures() { return 0; }
 
-    private class Panel extends JPanel {
+    private class Panel extends JPanel
+    {
 
         private Panel() {}
 
@@ -117,9 +122,9 @@ public class CTB extends Game {
             super.paintComponent(g);
             g.setColor(Color.RED);
             g.fillOval(state.ball_pos.x, state.ball_pos.y - CTBConstants.ball_radius,
-                    CTBConstants.ball_radius * 2, CTBConstants.ball_radius * 2);
+                       CTBConstants.ball_radius * 2, CTBConstants.ball_radius * 2);
             g.fillRect(state.catcher_pos.x, state.catcher_pos.y,
-                    CTBConstants.ball_radius*2, 10);
+                       CTBConstants.ball_radius * 2, 10);
         }
 
         @Override
@@ -146,5 +151,18 @@ public class CTB extends Game {
         frame.setLocationRelativeTo(null);
         frame.setSize(CTBConstants.window_width, CTBConstants.window_height);
         frame.setVisible(true);
+    }
+
+    @Override
+    public double[][] trainingStates(final int num_samples)
+    {
+        final Random generator = new Random();
+        double[][] samples = new double[num_samples][numStates()];
+        for (int k = 0; k < num_samples; ++k)
+        {
+            final int random_index   = generator.nextInt(numStates());
+            samples[k][random_index] = 1.0;
+        }
+        return samples;
     }
 }
