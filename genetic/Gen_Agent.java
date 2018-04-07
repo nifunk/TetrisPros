@@ -237,7 +237,7 @@ public class Gen_Agent {
         int max_idx = (int) Math.floor(input_population.length*fraction);
         int max_score_idx = 0;
         for (int i = 0; i < max_idx; i++){
-            int r = (int) Math.floor(getRandom(0, input_population.length));
+            int r = (int) Math.floor(getRandom(0, input_population.length-1));
             if (input_population[max_score_idx][game.numFeatures()] < input_population[r][game.numFeatures()]){
                 max_score_idx = r; 
             }
