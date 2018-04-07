@@ -217,9 +217,10 @@ public class Gen_Agent {
         for (int i=0;i<num_new_generated;i=i+2) {
             //determine which ones to cross
             //TODO: try with different parents (make sure that can1 != can2)
+            int candidate1, candidate2;
             do {
-                int candidate1 = (int) Math.round(getRandom(0,last_idx)); //round is essential since (int)9.8=9!!!
-                int candidate2 = (int) Math.round(getRandom(0,last_idx));
+                candidate1 = (int) Math.round(getRandom(0,last_idx)); //round is essential since (int)9.8=9!!!
+                candidate2 = (int) Math.round(getRandom(0,last_idx));
             } while (candidate1 == candidate2);
 
             //determine crossover point
