@@ -216,11 +216,13 @@ public class Gen_Agent {
         double[][]new_population = new double[num_new_generated][game.numFeatures()+1];
         for (int i=0;i<num_new_generated;i=i+2) {
             //determine which ones to cross
+            //TODO: try with different parents (make sure that can1 != can2)
             int candidate1 = (int) Math.round(getRandom(0,last_idx)); //round is essential since (int)9.8=9!!!
             int candidate2 = (int) Math.round(getRandom(0,last_idx));
             //determine crossover point
             int crossover = (int) Math.round(getRandom(1,game.numFeatures()-1));
             for (int k = 0; k < game.numFeatures(); k++) {
+                //TODO: try generating one child from 2 parents not 2 children simultaniously
                 if (k >= crossover) {
                     new_population[i][k] = input_population[candidate1][k];
                     new_population[i + 1][k] = input_population[candidate2][k];

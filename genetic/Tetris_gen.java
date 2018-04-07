@@ -279,6 +279,7 @@ public class Tetris_gen extends Game {
         for (int i =0; i<field_width*(field_height-1)-1;i++){
             int calc = virtual_state[3+i]-virtual_state[3+field_width+i]; //lower - upper
             //if above there is one but below not -> will yield to -1!!!
+            //TODO: change num of holes to the number of missing square boxes
             if (calc<0){
                 num_holes++;
             }
