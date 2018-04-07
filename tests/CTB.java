@@ -6,8 +6,11 @@ import game.Results;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Arrays;
 import java.util.Random;
 import javax.swing.*;
+
+import static java.lang.Math.abs;
 
 public class CTB extends Game
 {
@@ -41,7 +44,7 @@ public class CTB extends Game
 
     @Override
     protected double reward() {
-        return - (double)Math.abs(state.catcher_pos.x - state.ball_pos.x);
+        return - (double) abs(state.catcher_pos.x - state.ball_pos.x);
     }
 
     @Override
@@ -99,17 +102,36 @@ public class CTB extends Game
     @Override
     public Results virtual_move(int[] own_state, int action_index)
     {
-        return new Results(reward(), state(), terminal());
+        //Assumes: Move was checked before already!!!
+        int[] temp_state_array  = new int[numStates()];
+        //move the slider!
+        temp_state_array[state.catcher_pos.x + actions()[0][action_index]] = 1;
+        temp_state_array[CTBConstants.window_width + state.ball_pos.x] = 1;
+        boolean game_over = ((state.ball_pos.y-CTBConstants.ball_speed) > CTBConstants.window_height);
+
+        return new Results(0, temp_state_array, game_over);
     }
 
     @Override
     public double[] features(Results virtual_state_res)
     {
-        return new double[]{0};
+        // TODO: HERE HAS TO GO THE AUTOENCODER!!
+        int[] firstHalf = Arrays.copyOfRange(virtual_state_res.state, 0, numStates()/2);
+        int[] secondHalf = Arrays.copyOfRange(virtual_state_res.state, numStates()/2, numStates());
+        int brett_pos = 0;
+        int ball_pos = 0;
+        for (int i=0; i<(numStates()/2);i++){
+            if (firstHalf[i]!=0){brett_pos=i;}
+            if (secondHalf[i]!=0){ball_pos=i;}
+    }
+        int distance = abs(brett_pos-ball_pos);
+
+        return new double[]{distance};
     }
 
     @Override
-    public int numFeatures() { return 0; }
+    // TODO: apapt them depending how our autoencoder is designed to be!!!
+    public int numFeatures() { return 1; }
 
     private class Panel extends JPanel
     {

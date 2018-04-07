@@ -10,19 +10,19 @@ public class Player {
 
 	private Player() {
     	////For Q-qlearning:
-		QAgent agent = new QAgent(new TetrisInterface());
-		// Train encoder and agent.
-        agent.adapt();
-		// Perform as demonstration of results.
-        agent.getGame().activateVisualisation();
-    	agent.perform();
+		//QAgent agent = new QAgent(new TetrisInterface());
+		//// Train encoder and agent.
+        //agent.adapt();
+		//// Perform as demonstration of results.
+        ////agent.getGame().activateVisualisation();
+    	//agent.perform();
 
 		//For Genetic algorithm:
-		//Gen_Agent agent = new Gen_Agent(new TetrisInterface());
+		Gen_Agent agent = new Gen_Agent(new TetrisInterface());
 		//let the player act
-		//System.out.println("Simple agent performance was launched...");
+		System.out.println("Simple agent performance was launched...");
 		//agent.getGame().activateVisualisation();
-		//agent.perform();
+		agent.perform();
 		//let the player learn
 		//System.out.println("Genetic qlearning was launched...");
 		//agent.do_genetic_learning();

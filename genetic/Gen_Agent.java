@@ -19,7 +19,8 @@ public class Gen_Agent {
     public Gen_Agent(Game game) {
         this.game = game;
         //this.weights = new double[]{-0.51,0.76,-0.3566,-0.18448}; //internet weights
-        this.weights = new double[]{-3.459111196332234, 8.798745927744655, -17.509339945947517, -4.244590461223442}; //best trained so far!
+        //this.weights = new double[]{-3.459111196332234, 8.798745927744655, -17.509339945947517, -4.244590461223442}; //best trained so far!
+        this.weights = new double[]{-1};
     }
 
     public int perform() {
@@ -60,10 +61,19 @@ public class Gen_Agent {
             }
 
         //Step5: choose best move
-            double best_score=score[0];
-            int best_move=0;
-            for(int i=1;i<all_actions;i++){
-                if (score[i]>best_score){
+            double best_score = score[0];
+            int best_move = 0;
+            //find first valid move
+            for(int i=0;i<all_actions;i++){
+                if (game.checkAction(i)){
+                    best_score = score[i];
+                    best_move = i;
+                    break;
+                }
+            }
+
+            for(int i=(best_move+1);i<all_actions;i++){
+                if ((score[i]>best_score)&game.checkAction(i)){
                     best_score = score[i];
                     best_move = i;
                 }
