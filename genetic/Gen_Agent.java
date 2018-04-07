@@ -3,7 +3,7 @@ package genetic;
 import game.Game;
 import game.Results;
 
-import java.io.FileWriter;
+import java.io.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -15,15 +15,17 @@ public class Gen_Agent {
 
     private Game game;
     private double[] weights;
+    private boolean weights_loaded;
 
     public Gen_Agent(Game game) {
         this.game = game;
         //this.weights = new double[]{-0.51,0.76,-0.3566,-0.18448}; //internet weights
         //this.weights = new double[]{-3.459111196332234, 8.798745927744655, -17.509339945947517, -4.244590461223442}; //best trained so far!
-        this.weights = new double[]{-1};
+        this.weights_loaded = false;
     }
 
     public int perform() {
+        if(!this.weights_loaded){throw new java.lang.Error("weights not loaded!");}
         //just the function which really does the performance!
         //have a feature weight vector!
         //init reward!
@@ -294,6 +296,8 @@ public class Gen_Agent {
             final FileWriter fw = new FileWriter(filename);
             fw.write(getCurrentTimeStamp());
             fw.write("\n");
+            fw.write(game.numFeatures());
+            fw.write("\n");
             for (double[] action_rewards : matrix) {
                 for (double reward : action_rewards) {
                     fw.write(reward + ",");
@@ -303,6 +307,54 @@ public class Gen_Agent {
             fw.close();
         } catch (IOException e) { e.printStackTrace(); }
         System.out.println("Stored Best Results in " + filename);
+    }
+
+    public void loadMatrix(final String filename)
+    {
+        int num_features_txt = 0;
+        this.weights = new double[game.numFeatures()];
+        try
+        {
+            final BufferedReader in = new BufferedReader(new FileReader(filename));
+            String line;
+            int desired_weights = 2;
+            int offset = 1; //there stand the number of weights!!!
+            int i = 0;
+            int a = 0;
+            //System.out.println(game.numFeatures());
+            while ((line = in.readLine()) != null)
+            {
+                //System.out.print(line);
+                //System.out.print("\n");
+                //System.out.print(i);
+                if (i==offset){
+                    final String[] values = line.split(",");
+                    for (String str : values)
+                    {
+                        num_features_txt = Integer.parseInt(str);
+                        //Stop if number of features do not coincide
+                        if(num_features_txt!=game.numFeatures()){throw new java.lang.Error("number of features are different!");}
+                    }
+                }
+
+
+                if (i==desired_weights){
+                    final String[] values = line.split(",");
+                    for (String str : values)
+                    {
+                        if (a<game.numFeatures()){
+                            this.weights[a] = Double.parseDouble(str);
+                            a++;
+                        }
+                        if (a==(game.numFeatures()-1)){this.weights_loaded=true;}
+
+                    }
+                }
+                i++;
+                }
+
+        } catch (IOException e) { e.printStackTrace(); }
+        System.out.println("Loaded Desired weights in " + filename);
     }
 
     public String getCurrentTimeStamp() {

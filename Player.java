@@ -19,6 +19,7 @@ public class Player {
 
 		//For Genetic algorithm:
 		Gen_Agent agent = new Gen_Agent(new TetrisInterface());
+		agent.loadMatrix("201803121313.txt");
 		//let the player act
 		System.out.println("Simple agent performance was launched...");
 		//agent.getGame().activateVisualisation();
