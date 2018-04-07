@@ -258,13 +258,14 @@ public class Gen_Agent {
         double[][]new_population = new double[input_population.length][game.numFeatures()+1];
         //population with which games were played
         double[][]eval_population = new double[input_population.length][game.numFeatures()+1];
+        int num_features = game.numFeatures();
 
         eval_population = evalPopulation(input_population, num_repetitions);
 
 
         //take the best 30% of the old generation (init generation)
         for (int i = 0 ; i < bestOfOld ; i++) {
-            for (int j = 0; j < game.numFeatures(); j++) {
+            for (int j = 0; j < num_features; j++) {
                 new_population[i][j] = eval_population[i][j];
             }
         }
@@ -273,27 +274,42 @@ public class Gen_Agent {
         for (int i = bestOfOld; i < input_population.length ; i++) {
             int parent1 = pickParent(input_population, fraction);
             int parent2 = pickParent(input_population, fraction);
-            double[] child = new double[game.numFeatures()+1];
+            //TODO: parents can be the same?
+            double[] child = new double[num_features+1];
 
+            //
             //heuristic 1
             if (child_heuristic == 0){
                 double rand_val = getRandom(0, 1);
                 if (rand_val > 0.5){
-                    for(int j = 0; j < game.numFeatures() + 1; j++){
+                    for(int j = 0; j < num_features + 1; j++){
                         child[j] = input_population[parent1][j];
                     }
                 }
                 else{
-                    for(int j = 0; j < game.numFeatures() + 1; j++){
+                    for(int j = 0; j < num_features + 1; j++){
                         child[j] = input_population[parent2][j];
                     }
                 }
             }
             //heuristic 2
-            else{
-                for(int j = 0; j < game.numFeatures() + 1; j++){
+            else if(child_heuristic == 1){
+                for(int j = 0; j < num_features + 1; j++){
                     child[j] = (input_population[parent1][j] + input_population[parent2][j])/2;
                 }
+            }
+            //heuristic 3 - take weights from both parent 1 and parent 2
+            else {
+                for (int j = 0; j < num_features; j++) {
+                    double rand_val = getRandom(0, 1);
+                    if (rand_val > 0.5){
+                        child[j] = input_population[parent1][j];
+                    }
+                    else{
+                        child[j] = input_population[parent2][j];
+                    }
+                }
+                child[num_features] = (input_population[parent1][num_features] + input_population[parent2][num_features])/2
             }
 
             // put child in the new generation
