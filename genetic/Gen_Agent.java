@@ -299,4 +299,6 @@ public class Gen_Agent {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
     }
 
+    public Game getGame() {return game; }
+
 }
