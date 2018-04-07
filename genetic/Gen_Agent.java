@@ -139,7 +139,6 @@ public class Gen_Agent {
             
             init_population = doCrossingandMutation(init_population, num_repetitions, fraction, child_heuristic, prop_mutation, fraction_direct_pass);
             System.out.println( (i+1) + " Selected population created....");
-
         }
        
 
@@ -149,8 +148,9 @@ public class Gen_Agent {
         //double [][]final_result = fuseMatrix(init_population,selected_population,entries);
         init_population = evalPopulation(init_population, num_repetitions);
 
-        String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
-        storeMatrix(fileName, init_population, numGenerations, size_init_population);
+        //String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
+        String fileName = size_init_population + "_" + numGenerations + "_" + child_heuristic + ".txt";
+        storeMatrix(fileName, init_population, numGenerations, size_init_population, child_heuristic);
 
         System.out.println("You have completed "+init_population[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
@@ -304,7 +304,6 @@ public class Gen_Agent {
                     new_population[i][j] = new_population[i][j] * getRandom(0, 1.5);
                 }
             }
-
         }
 
         return new_population;
@@ -339,7 +338,7 @@ public class Gen_Agent {
     }
 
 
-    public void storeMatrix(final String filename, double[][]matrix, int generations, int size_init_population) {
+    public void storeMatrix(final String filename, double[][]matrix, int generations, int size_init_population, int heuristic) {
         try {
             final FileWriter fw = new FileWriter(filename);
             fw.write(getCurrentTimeStamp());
@@ -347,6 +346,8 @@ public class Gen_Agent {
             fw.write("Number of generations: " + generations);
             fw.write("\n");
             fw.write("Size of population: " + size_init_population);
+            fw.write("\n");
+            fw.write("Heuristic " + heuristic);
             fw.write("\n");
             for (double[] action_rewards : matrix) {
                 for (double reward : action_rewards) {
