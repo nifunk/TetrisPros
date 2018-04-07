@@ -92,7 +92,7 @@ public class Gen_Agent {
         //general assumption: feature 0,2,3 must be penalized
         //feature 1 must be pushed -> positive
 
-        int size_init_population = 500; //was 1000
+        int size_init_population = 50; //was 500
         int num_repetitions = 10;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[]{-40,0,-40,-40};
@@ -114,9 +114,8 @@ public class Gen_Agent {
         // double tokeep = 0.05; //percentage of initial population you want to keep, must be smaller than 1!!!
         // double size_new_pop = 0.3; //size of new population relative to initial population (should be smaller than 0.5)
         //reason: is twice this percentage later cause cross over is mutual -> real percentace = 2*size_new_pop
-        double prop_mutation = 0.1;
-        int numGenerations = 100;
-        int num_repetitions = 10;
+
+        int numGenerations = 10; //100
         double fraction = 0.25;
         int child_heuristic = 0; 
         double prop_mutation= 0.05;
@@ -235,10 +234,10 @@ public class Gen_Agent {
 
 
     int pickParent(double[][]input_population, double fraction){
-        int max_idx = (int) Math.round(input_population.length*fraction);
+        int max_idx = (int) Math.floor(input_population.length*fraction);
         int max_score_idx = 0;
         for (int i = 0; i < max_idx; i++){
-            int r = (int) Math.round(getRandom(0, input_population.length));
+            int r = (int) Math.floor(getRandom(0, input_population.length));
             if (input_population[max_score_idx][game.numFeatures()+1] < input_population[r][game.numFeatures()+1]){
                 max_score_idx = r; 
             }
@@ -253,7 +252,7 @@ public class Gen_Agent {
     //prop_mutation = propability for a possible mutation
     //weights intervals needed for the possible mutation!
     //returns: new crossed and mutated array!!
-    private double[][] doCrossingandMutation(double[][] input_population, int num_repetitions = 10, double fraction = 0.25, int child_heuristic = 0, double prop_mutation= 0.05, double fraction_direct_pass = 0.3){
+    private double[][] doCrossingandMutation(double[][] input_population, int num_repetitions, double fraction, int child_heuristic, double prop_mutation, double fraction_direct_pass){
         int size_input = input_population.length;
         int bestOfOld = (int) Math.round(fraction_direct_pass * input_population.length);
         double[][]new_population = new double[input_population.length][game.numFeatures()+1];
