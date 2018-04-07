@@ -232,6 +232,38 @@ public class Gen_Agent {
         return population;
     }
 
+    private double[] evalChild(double[] child, int num_repetitions){
+            //set weights in this iteration
+        for (int j = 0; j < game.numFeatures(); j++) {
+            this.weights[j] = child[j];
+        }
+        
+        //play num_repetition times
+        double[] store_score = new double[num_repetitions];
+        for (int j = 0; j < num_repetitions; j++) {
+            store_score[j] = this.perform();
+        }
+
+        double score_best = store_score[0];
+
+        //HERE: store BEST SCORE VALUE!
+        //for (int j = 1; j < num_repetitions; j++) {
+        //    if (store_score[j] > score_best) {
+        //        score_best = store_score[j];
+        //    }
+        //}
+
+        //OR: store the MEAN of all scores:
+        for (int j = 1; j < num_repetitions; j++) {
+            score_best = score_best + store_score[j];
+        }
+        score_best = score_best/num_repetitions;
+
+
+        child[game.numFeatures()] = score_best;
+    	return child;
+    }
+
 
     int pickParent(double[][]input_population, double fraction){
         int max_idx = (int) Math.floor(input_population.length*fraction);
@@ -259,7 +291,8 @@ public class Gen_Agent {
         //population with which games were played
         double[][]eval_population = new double[input_population.length][game.numFeatures()+1];
 
-        eval_population = evalPopulation(input_population, num_repetitions);
+        eval_population = evalPopulation(input_population, num_repetitions); // for the parent population
+        double worst_performer_score = eval_population[eval_population.length-1][game.numFeatures()];
 
 
         //take the best 30% of the old generation (init generation)
@@ -269,36 +302,42 @@ public class Gen_Agent {
             }
         }
 
-
         for (int i = bestOfOld; i < input_population.length ; i++) {
-            int parent1 = pickParent(input_population, fraction);
-            int parent2 = pickParent(input_population, fraction);
             double[] child = new double[game.numFeatures()+1];
-
-            //heuristic 1
-            if (child_heuristic == 0){
-                double rand_val = getRandom(0, 1);
-                if (rand_val > 0.5){
-                    for(int j = 0; j < game.numFeatures() + 1; j++){
-                        child[j] = input_population[parent1][j];
-                    }
-                }
-                else{
-                    for(int j = 0; j < game.numFeatures() + 1; j++){
-                        child[j] = input_population[parent2][j];
-                    }
-                }
-            }
-            //heuristic 2
-            else{
-                for(int j = 0; j < game.numFeatures() + 1; j++){
-                    child[j] = (input_population[parent1][j] + input_population[parent2][j])/2;
-                }
-            }
+            
+            int iter = 0;
+            do{
+            	int parent1 = pickParent(input_population, fraction);
+	            int parent2 = pickParent(input_population, fraction);
+	            //heuristic 1
+	            if (child_heuristic == 0){
+	                double rand_val = getRandom(0, 1);
+	                if (rand_val > 0.5){
+	                    for(int j = 0; j < game.numFeatures() + 1; j++){
+	                        child[j] = input_population[parent1][j];
+	                    }
+	                }
+	                else{
+	                    for(int j = 0; j < game.numFeatures() + 1; j++){
+	                        child[j] = input_population[parent2][j];
+	                    }
+	                }
+	                child = evalChild(child, num_repetitions);
+	            }
+	            //heuristic 2
+	            else{
+	                for(int j = 0; j < game.numFeatures() + 1; j++){
+	                    child[j] = (input_population[parent1][j] + input_population[parent2][j])/2;
+	                }
+	                child = evalChild(child, num_repetitions);
+	            }
+	            iter++;
+            } while (child[game.numFeatures()] < worst_performer_score && iter < 5);
+            
 
             // put child in the new generation
             for(int j = 0; j < game.numFeatures() + 1; j++){
-                new_population[i][j] = child[j];
+            	new_population[i][j] = child[j];
                 double mutate_rand_val = getRandom(0, 1);
                 if(mutate_rand_val < prop_mutation){
                     new_population[i][j] = new_population[i][j] * getRandom(0, 1.5);
