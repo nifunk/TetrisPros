@@ -116,7 +116,7 @@ public class Gen_Agent {
             //CTB: -1* absolute distance between ball and board -> if we search for maximum we find the best!!!
             total_reward = results.reward;
         }
-        //System.out.println("You have completed "+total_reward+" rows.");
+        System.out.println("You have completed "+total_reward+" rows.");
         game = game.restart();
         return (int)total_reward;
     }

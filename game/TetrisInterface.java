@@ -59,7 +59,12 @@ public class TetrisInterface extends Game
     // Restart game, i.e. closing old and starting new game.
     public Game restart()
     {
-        return new TetrisInterface();
+        TetrisInterface new_game = new TetrisInterface();
+        if (encoder.encoderReady())
+            {
+                new_game.encoder = encoder;
+            }
+        return new_game;
     }
 
     @Override
@@ -148,7 +153,7 @@ public class TetrisInterface extends Game
         return false;
     }
 
-    public int numStates(){ return 200; }
+    public int numStates(){ return _state.ROWS*_state.COLS; }
 
     public int numActions(){ return 40; }
 
@@ -288,57 +293,71 @@ public class TetrisInterface extends Game
     //output: array of features!
     public double[] features (Results virtual__state_res)
     {
-        int[] virtual__state = virtual__state_res.state;
-        double num_cleared_rows = virtual__state_res.reward;
-        int field_width = virtual__state[1];
-        int field_height = virtual__state[2];
+        if(encoder.encoderReady()){
+            double[] state_double = new double[this.numStates()];
+            for(int i = 0; i < this.numStates(); i++)
+                state_double[i] = virtual__state_res.state[i+3];
 
-        // calc number of holes/check for holes
-        int num_holes = 0;
-        for (int i =0; i<field_width*(field_height-1)-1;i++)
-        {
-            int calc = virtual__state[3+i]-virtual__state[3+field_width+i]; //lower - upper
-            //if above there is one but below not -> will yield to -1!!!
-            if (calc<0) num_holes++;
+            return encoder.encoding(convolve(state_double));
+            //return encoder.encoding((state_double));
         }
+        else{
+            int[] virtual__state = virtual__state_res.state;
+            double num_cleared_rows = virtual__state_res.reward;
+            int field_width = virtual__state[1];
+            int field_height = virtual__state[2];
 
-        //calc height of each column
-        int[]height_map = new int[field_width];
-        for (int i =0; i<field_width;i++)
-        {
-            for (int j=0; j<field_height;j++)
-            { //go over all possible heights!
-                if (virtual__state[3+i+j*field_width]!=0){
-                    height_map[i]=j;
+            // calc number of holes/check for holes
+            int num_holes = 0;
+            for (int i =0; i<field_width*(field_height-1)-1;i++)
+            {
+                int calc = virtual__state[3+i]-virtual__state[3+field_width+i]; //lower - upper
+                //if above there is one but below not -> will yield to -1!!!
+                if (calc<0) num_holes++;
+            }
+
+            //calc height of each column
+            int[]height_map = new int[field_width];
+            for (int i =0; i<field_width;i++)
+            {
+                for (int j=0; j<field_height;j++)
+                { //go over all possible heights!
+                    if (virtual__state[3+i+j*field_width]!=0){
+                        height_map[i]=j;
+                    }
                 }
             }
-        }
 
-        //from there extract: aggregate height:
-        int aggregate_height = 0;
-        for (int j=0; j<field_width; j++){
-            aggregate_height = aggregate_height + height_map[j];
-        }
+            //from there extract: aggregate height:
+            int aggregate_height = 0;
+            for (int j=0; j<field_width; j++){
+                aggregate_height = aggregate_height + height_map[j];
+            }
 
-        //from there extract: bumpieness:
-        int bumpieness = 0;
-        for (int j=1; j<field_width; j++)
-        {
-            bumpieness = bumpieness + Math.abs(height_map[j]-height_map[j-1]);
-        }
+            //from there extract: bumpieness:
+            int bumpieness = 0;
+            for (int j=1; j<field_width; j++)
+            {
+                bumpieness = bumpieness + Math.abs(height_map[j]-height_map[j-1]);
+            }
 
-        return new double[]{num_holes,num_cleared_rows,aggregate_height,bumpieness};
+            return new double[]{num_holes,num_cleared_rows,aggregate_height,bumpieness};
+        }
     }
 
     public double[][] trainingStates(final int num_samples)
     {
         final Random generator = new Random();
-        double[][] samples = new double[num_samples][200];
-        for (int k = 0; k < num_samples; ++k)
-            for (int i = 0; i < 200; ++i)
-            {
+        double[][] samples = new double[num_samples][this.numStates()];
+        for (int k = 0; k < num_samples; ++k) {
+            for (int i = 0; i < 200; ++i) {
                 samples[k][i] = generator.nextBoolean() ? 1 : 0;
             }
+        }
+
+        for (int k = 0; k < num_samples; ++k){
+            samples[k] = convolve(samples[k]);
+        }
         return samples;
     }
 
@@ -347,7 +366,8 @@ public class TetrisInterface extends Game
     {
         //add +1 since rows cleared is already available after the virtual move!!!
         //TODO: adapt to function above
-        return (3+1);
+
+        return encoder.encoderReady() ? encoder.getEncoderSize() : (3+1);
     }
 
     @Override
@@ -355,6 +375,30 @@ public class TetrisInterface extends Game
     {
         _visualise_game = true;
         new TFrame(_state);
+    }
+
+    private double[]convolve(double[] state_double)
+    {
+        //3x3 CONVOLUTEN!!!!
+        int ROWS = _state.ROWS;
+        int COLS = _state.COLS;
+        double[] state_double_ = new double[this.numStates()];
+        // horizontal addition
+        for (int j=0;j<this.numStates();j++){
+            if ((j%COLS)==0){state_double_[j] = 2*state_double[j]+state_double[j+1];}
+            else if ((j%COLS)==(COLS-1)) {state_double_[j] = 2*state_double[j]+state_double[j-1];}
+            else {state_double_[j] = state_double[j-1]+state_double[j]+state_double[j+1];}
+        }
+        // vertical addition
+        for (int j=0;j<this.numStates();j++){
+            if ((j/COLS)==0){state_double[j] = 2*state_double_[j]+state_double_[j+COLS];}
+            else if ((j/COLS)==(ROWS-1)) {state_double[j] = 2*state_double_[j]+state_double_[j-COLS];}
+            else {state_double[j]= state_double_[j-COLS]+state_double_[j]+state_double_[j+COLS];}
+        }
+        for (int j=0;j<this.numStates();j++){
+            state_double[j] = state_double[j]/9;
+        }
+        return state_double;
     }
 
 }

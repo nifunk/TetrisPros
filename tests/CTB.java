@@ -73,17 +73,17 @@ public class CTB extends Game
     {
         CTB new_game = new CTB();
         if (visualise_game)
-        {
-            frame.setVisible(false);
-            frame.dispose();
-            new_game.activateVisualisation();
-        }
-        if (encoder.encoderReady())
-        {
-            new_game.encoder = encoder;
-        }
-        return new_game;
+    {
+        frame.setVisible(false);
+        frame.dispose();
+        new_game.activateVisualisation();
     }
+        if (encoder.encoderReady())
+    {
+        new_game.encoder = encoder;
+    }
+        return new_game;
+}
 
     @Override
     public int[][] actions()

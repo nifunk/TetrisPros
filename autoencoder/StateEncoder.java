@@ -8,6 +8,7 @@ import org.encog.ml.data.basic.BasicMLData;
 import org.encog.ml.data.basic.BasicMLDataSet;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.networks.layers.BasicLayer;
+import org.encog.neural.networks.training.propagation.back.Backpropagation;
 import org.encog.neural.networks.training.propagation.sgd.StochasticGradientDescent;
 import org.encog.persist.EncogDirectoryPersistence;
 
@@ -17,18 +18,18 @@ public class StateEncoder
 {
     private BasicNetwork _network = new BasicNetwork();
 
-    private final int ENCODER_SIZE      = 2;
+    private final int ENCODER_SIZE      = 15;
     private final int ENCODER_LAYER     = 1;
-    private final double LEARNING_RATE  = 1e-6;
-    private final int BATCH_SIZE        = 100;
-    private final double TERMINAL_ERROR = 0.025;
+    private final double LEARNING_RATE  = 1e-9; //was 10e-6 for CTB
+    private final int BATCH_SIZE        = 2; //was 100 for CTB
+    private final double TERMINAL_ERROR = 1.5; //was 0.025 CTB
 
     private boolean network_ready  = false;
 
     public void buildNetwork(final int input_size)
     {
         _network.addLayer(new BasicLayer(new ActivationReLU(), true, input_size));
-        _network.addLayer(new BasicLayer(new ActivationLinear(), true, ENCODER_SIZE));
+        _network.addLayer(new BasicLayer(new ActivationReLU(), true, ENCODER_SIZE));
         _network.addLayer(new BasicLayer(new ActivationReLU(), true, input_size));
         _network.getStructure().finalizeStructure();
         _network.reset();
@@ -51,8 +52,27 @@ public class StateEncoder
             System.out.printf("Epoch #%d, Error = %f, Grad = %f\n",
                               epoch, train.getError(), Math.abs(train.getError() - last_error));
             epoch++;
+            if(epoch>5000){
+                epoch = 0;
+                _network.reset();
+            }
         } while (Math.abs(train.getError()) > TERMINAL_ERROR);
         train.finishTraining();
+
+
+        Backpropagation train_ = new Backpropagation(_network, training_data);
+        //train_.setLearningRate(LEARNING_RATE);
+        train_.setBatchSize(BATCH_SIZE);
+        do {
+            last_error = train_.getError();
+            train_.iteration();
+            System.out.printf("Epoch #%d, Error = %f, Grad = %f\n",
+                    epoch, train_.getError(), Math.abs(train_.getError() - last_error));
+            epoch++;
+        } while (Math.abs(train_.getError() - last_error) > 10e-4);
+        train_.finishTraining();
+
+
     }
 
     public double[] encoding(final double[] input)
