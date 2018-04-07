@@ -32,9 +32,21 @@ public class CTB extends Game
     @Override
     public Results step(final int action)
     {
+        //MAKE THE ACTION
         state.update(actions()[0][action]);
         if (visualise_game) panel.repaint();
-        return new Results(reward(), state(), terminal());
+        //CALCULATE THE REWARD:
+        int[] firstHalf = Arrays.copyOfRange(this.state(), 0, this.numStates()/2);
+        int[] secondHalf = Arrays.copyOfRange(this.state(), this.numStates()/2, numStates());
+        int brett_pos = 0;
+        int ball_pos = 0;
+        for (int i=0; i<(numStates()/2);i++){
+            if (firstHalf[i]!=0){brett_pos=i;}
+            if (secondHalf[i]!=0){ball_pos=i;}
+        }
+        //Reward is negative distance such that we can later search for maximum!
+        int distance = -abs(brett_pos-ball_pos);
+        return new Results(distance, state(), terminal());
     }
 
     @Override

@@ -21,6 +21,7 @@ public class Gen_Agent {
         this.game = game;
         //this.weights = new double[]{-0.51,0.76,-0.3566,-0.18448}; //internet weights
         //this.weights = new double[]{-3.459111196332234, 8.798745927744655, -17.509339945947517, -4.244590461223442}; //best trained so far!
+        this.weights = new double[game.numFeatures()]; //only to initialize
         this.weights_loaded = false;
     }
 
@@ -83,6 +84,8 @@ public class Gen_Agent {
         //Step6: execute this best move
             results = game.step(best_move);
         //Step7: save reward such that You know how succesfull these weights were!!
+            //TETRIS: NUMBER CLEARED ROWS!
+            //CTB: -1* absolute distance between ball and board -> if we search for maximum we find the best!!!
             total_reward = results.reward;
         }
         //System.out.println("You have completed "+total_reward+" rows.");
@@ -95,16 +98,19 @@ public class Gen_Agent {
         //general assumption: feature 0,2,3 must be penalized
         //feature 1 must be pushed -> positive
 
-        int size_init_population = 500; //was 1000
+        int size_init_population = 10; //was 1000
         int num_repetitions = 10;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
-        double[]weights_lowerbound = new double[]{-40,0,-40,-40};
-        double[]weights_upperbound = new double[]{0,40,0,0};
+        double[]weights_lowerbound = new double[game.numFeatures()];
+        Arrays.fill(weights_lowerbound, -40.0);
+        double[]weights_upperbound = new double[game.numFeatures()];
+        Arrays.fill(weights_upperbound, 40.0);
 
         //generate initial population
         for (int i=0;i<size_init_population;i++){
             for (int j = 0; j<game.numFeatures(); j++){
                 init_population[i][j]= getRandom(weights_lowerbound[j],weights_upperbound[j]);
+                this.weights_loaded = true;
             }
         }
         System.out.println("Initial population generated....");
@@ -130,6 +136,10 @@ public class Gen_Agent {
 
 
         //Fuse selected_population and init_population to get the really best!!
+        //QUALITY METRICS:
+        //TETRIS: NUMBER CLEARED ROWS!
+        //CTB: -1* absolute distance between ball and board -> if we search for maximum we find the best!!!
+
         int entries = 10; //store the 10 best overall!!!
         double [][]final_result = fuseMatrix(init_population,selected_population,entries);
         String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
@@ -228,7 +238,7 @@ public class Gen_Agent {
         double[][]new_population = new double[num_new_generated][game.numFeatures()+1];
         for (int i=0;i<num_new_generated;i=i+2) {
             //determine which ones to cross
-            int candidate1 = (int) Math.round(getRandom(0,last_idx)); //round is essential since (int)9.8=9!!!
+            int candidate1 = (int) Math.round(getRandom(0,last_idx)); //round is essential
             int candidate2 = (int) Math.round(getRandom(0,last_idx));
             //determine crossover point
             int crossover = (int) Math.round(getRandom(1,game.numFeatures()-1));
@@ -296,7 +306,7 @@ public class Gen_Agent {
             final FileWriter fw = new FileWriter(filename);
             fw.write(getCurrentTimeStamp());
             fw.write("\n");
-            fw.write(game.numFeatures());
+            fw.write(Integer.toString(game.numFeatures()));
             fw.write("\n");
             for (double[] action_rewards : matrix) {
                 for (double reward : action_rewards) {
@@ -312,7 +322,6 @@ public class Gen_Agent {
     public void loadMatrix(final String filename)
     {
         int num_features_txt = 0;
-        this.weights = new double[game.numFeatures()];
         try
         {
             final BufferedReader in = new BufferedReader(new FileReader(filename));
@@ -346,7 +355,7 @@ public class Gen_Agent {
                             this.weights[a] = Double.parseDouble(str);
                             a++;
                         }
-                        if (a==(game.numFeatures()-1)){this.weights_loaded=true;}
+                        if (a>=(game.numFeatures()-1)){this.weights_loaded=true;}
 
                     }
                 }

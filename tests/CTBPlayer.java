@@ -26,6 +26,7 @@ public class CTBPlayer{
         //For Genetic algorithm:
         Gen_Agent agent = new Gen_Agent(new CTB());
         //let the player act
+        agent.loadMatrix("201804071650.txt");
         System.out.println("Simple agent performance was launched...");
         agent.getGame().activateVisualisation();
         agent.perform();
