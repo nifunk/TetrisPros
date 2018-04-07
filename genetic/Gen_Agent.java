@@ -150,7 +150,7 @@ public class Gen_Agent {
         init_population = evalPopulation(init_population, num_repetitions);
 
         String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
-        storeMatrix(fileName, init_population);
+        storeMatrix(fileName, init_population, numGenerations, size_init_population);
 
         System.out.println("You have completed "+init_population[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
@@ -339,10 +339,14 @@ public class Gen_Agent {
     }
 
 
-    public void storeMatrix(final String filename, double[][]matrix) {
+    public void storeMatrix(final String filename, double[][]matrix, int generations, int size_init_population) {
         try {
             final FileWriter fw = new FileWriter(filename);
             fw.write(getCurrentTimeStamp());
+            fw.write("\n");
+            fw.write("Number of generations: " + generations);
+            fw.write("\n");
+            fw.write("Size of population: " + size_init_population);
             fw.write("\n");
             for (double[] action_rewards : matrix) {
                 for (double reward : action_rewards) {
