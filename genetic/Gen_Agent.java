@@ -106,6 +106,7 @@ public class Gen_Agent {
         double size_new_pop = 0.3; //size of new population relative to initial population (should be smaller than 0.5)
         //reason: is twice this percentage later cause cross over is mutual -> real percentace = 2*size_new_pop
         double prop_mutation = 0.1;
+        int numGenerations = 100;
 
         /*TODO: new function that will use doCrossingMutation and will generate the new generation from the old one in as follows:
             - take 25-30% of the best performing parents as children
@@ -116,22 +117,29 @@ public class Gen_Agent {
                 - Mutation: For each member and each weight, check if mutation occurs and if it does then multiply weight with uniform -1.5 and 1.5
                 - Fitness function check: check if the child performs as least as good as the worst child so far. If so, remove the child.
                 Set a limit of kicked out childs and take the best removed one as a child.*/ 
-        //TODO: train over multiple generations 
-        //STEP3: crossover and mutation
-        double[][] selected_population = doCrossingandMutation(init_population,tokeep,size_new_pop,prop_mutation,weights_lowerbound,weights_upperbound);
-        System.out.println("Selected population created....");
+        
 
-        //play with all the combinations and store the highest
-        selected_population = evalPopulation(selected_population,num_repetitions);
+        for (int i = 0; i < numGenerations ; i++) {
+             //TODO: train over multiple generations 
+            //STEP3: crossover and mutation
+            //double[][] selected_population = doCrossingandMutation(init_population,tokeep,size_new_pop,prop_mutation,weights_lowerbound,weights_upperbound);
+            
+            init_population = doCrossingandMutation(init_population,tokeep,size_new_pop,prop_mutation,weights_lowerbound,weights_upperbound);
+            System.out.println( (i+1) + " Selected population created....");
 
-        System.out.println("Selected population succesfully evaluated!");
+            //play with all the combinations and store the highest
+            //init_population = evalPopulation(selected_population,num_repetitions);
+
+            //System.out.println( (i+1) + " Selected population succesfully evaluated!");
+        }
+       
 
 
         //Fuse selected_population and init_population to get the really best!!
-        int entries = 10; //store the 10 best overall!!!
-        double [][]final_result = fuseMatrix(init_population,selected_population,entries);
+        //int entries = 10; //store the 10 best overall!!!
+        //double [][]final_result = fuseMatrix(init_population,selected_population,entries);
         String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
-        storeMatrix(fileName,final_result);
+        storeMatrix(fileName, init_population);
 
         System.out.println("You have completed "+final_result[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
@@ -213,6 +221,20 @@ public class Gen_Agent {
         return population;
     }
 
+
+    int pickParent(double[][]input_population, double fraction){
+        int max_idx = (int) Math.round(input_population.length*fraction);
+        int max_score_idx = 0;
+        for (int i = 0; i < max_idx; i++){
+            int r = (int) Math.round(getRandom(0, input_population.length));
+            if (input_population[max_score_idx][game.numFeatures()+1] < input_population[r][game.numFeatures()+1]){
+                max_score_idx = r; 
+            }
+        }
+        return max_score_idx
+    }
+
+
     //expects: population that we want to mutate and cross which is ordered descendingly!!!
     //to_keep = percentage of population we want to use for crossover
     //size_new: how big should new population be in percent of initial!!!
@@ -220,49 +242,63 @@ public class Gen_Agent {
     //weights intervals needed for the possible mutation!
     //returns: new crossed and mutated array!!
     private double[][] doCrossingandMutation(double[][]input_population,double to_keep,double size_new, double prop_mutation, double[] weigths_lower, double[] weights_upper){
+        int num_repetitions = 10;
         int size_input = input_population.length;
-        int num_new_generated = 2*(int) Math.round(size_input*size_new); //since crossing over is mutual*2
-        int last_idx = (int) Math.round(size_input*to_keep); //last index of input array we consider!!!
-        double[][]new_population = new double[num_new_generated][game.numFeatures()+1];
-        for (int i=0;i<num_new_generated;i=i+2) {
-            //determine which ones to cross
-            //TODO: try with different parents (make sure that can1 != can2)
-            int candidate1, candidate2;
-            do {
-                candidate1 = (int) Math.round(getRandom(0,last_idx)); //round is essential since (int)9.8=9!!!
-                candidate2 = (int) Math.round(getRandom(0,last_idx));
-            } while (candidate1 == candidate2);
+        int bestOfOld = (int) Math.round(0.3*init_population.length);
+        double fraction = 0.3;
+        int child_heuristic = 0;
+        double[][]new_population = new double[input_population.length][game.numFeatures()+1];
+        //population with which games were played
+        double[][]eval_population = new double[input_population.length][game.numFeatures()+1];
 
-            //determine crossover point
-            int crossover = (int) Math.round(getRandom(1,game.numFeatures()-1));
-            for (int k = 0; k < game.numFeatures(); k++) {
-                //TODO: try generating one child from 2 parents not 2 children simultaniously
-                if (k >= crossover) {
-                    new_population[i][k] = input_population[candidate1][k];
-                    new_population[i + 1][k] = input_population[candidate2][k];
-                } else {
-                    new_population[i][k] = input_population[candidate2][k];
-                    new_population[i + 1][k] = input_population[candidate1][k];
-                }
+        eval_population = evalPopulation(input_population, num_repetitions);
 
-            }
 
-            //possible mutation:
-            if (getRandom(0,1) < prop_mutation) {
-                //determine point of mutation:
-                int pos_mutation = (int) Math.round(getRandom(0,game.numFeatures()-1));
-                //new value
-                new_population[i][pos_mutation] = getRandom(weigths_lower[pos_mutation],weights_upper[pos_mutation]);
-            }
-
-            //possible mutation:
-            if (getRandom(0,1) < prop_mutation) {
-                //determine point of mutation:
-                int pos_mutation = (int) Math.round(getRandom(0,game.numFeatures()-1));
-                //new value
-                new_population[i+1][pos_mutation] = getRandom(weigths_lower[pos_mutation],weights_upper[pos_mutation]);
+        //take the best 30% of the old generation (init generation)
+        for (int i = 0 ; i < bestOfOld ; i++) {
+            for (int j = 0; j < game.numFeatures(); j++) {
+                new_population[i][j] = eval_population[i][j];
             }
         }
+
+
+        for (int i = bestOfOld; i < input_population.length ; i++) {
+            int parent1 = pickParent(input_population, fraction);
+            int parent2 = pickParent(input_population, fraction);
+            double[] child = new double[game.numFeatures()+1];
+
+            //heuristic 1
+            if (child_heuristic == 0){
+                double rand_val = getRandom(0, 1);
+                if (rand_val > 0.5){
+                    for(int j = 0; j < game.numFeatures() + 1; j++){
+                        child[j] = input_population[parent1][j];
+                    }
+                }
+                else{
+                    for(int j = 0; j < game.numFeatures() + 1; j++){
+                        child[j] = input_population[parent2][j];
+                    }
+                }
+            }
+            //heuristic 2
+            else{
+                for(int j = 0; j < game.numFeatures() + 1; j++){
+                    child[j] = (input_population[parent1][j] + input_population[parent2][j])/2;
+                }
+            }
+
+            // put child in the new generation
+            for(int j = 0; j < game.numFeatures() + 1; j++){
+                new_population[i][j] = child[j];
+                double mutate_rand_val = getRandom(0, 1);
+                if(mutate_rand_val < prop_mutation){
+                    new_population[i][j] = new_population[i][j] * getRandom(0, 1.5);
+                }
+            }
+
+        }
+
         return new_population;
     }
 
