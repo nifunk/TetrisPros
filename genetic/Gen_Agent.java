@@ -102,11 +102,16 @@ public class Gen_Agent {
         System.out.println("Initial population succesfully evaluated");
 
         //STEP2: choose the best ones -> selection
-        double tokeep = 0.05; //percentage of initial population you want to keep, must be smaller than 1!!!
-        double size_new_pop = 0.3; //size of new population relative to initial population (should be smaller than 0.5)
+        // double tokeep = 0.05; //percentage of initial population you want to keep, must be smaller than 1!!!
+        // double size_new_pop = 0.3; //size of new population relative to initial population (should be smaller than 0.5)
         //reason: is twice this percentage later cause cross over is mutual -> real percentace = 2*size_new_pop
         double prop_mutation = 0.1;
         int numGenerations = 100;
+        int num_repetitions = 10;
+        double fraction = 0.25;
+        int child_heuristic = 0; 
+        double prop_mutation= 0.05;
+        double fraction_direct_pass = 0.3;
 
         /*TODO: new function that will use doCrossingMutation and will generate the new generation from the old one in as follows:
             - take 25-30% of the best performing parents as children
@@ -124,13 +129,9 @@ public class Gen_Agent {
             //STEP3: crossover and mutation
             //double[][] selected_population = doCrossingandMutation(init_population,tokeep,size_new_pop,prop_mutation,weights_lowerbound,weights_upperbound);
             
-            init_population = doCrossingandMutation(init_population,tokeep,size_new_pop,prop_mutation,weights_lowerbound,weights_upperbound);
+            init_population = doCrossingandMutation(init_population, num_repetitions, fraction, child_heuristic, prop_mutation, fraction_direct_pass);
             System.out.println( (i+1) + " Selected population created....");
 
-            //play with all the combinations and store the highest
-            //init_population = evalPopulation(selected_population,num_repetitions);
-
-            //System.out.println( (i+1) + " Selected population succesfully evaluated!");
         }
        
 
@@ -138,6 +139,8 @@ public class Gen_Agent {
         //Fuse selected_population and init_population to get the really best!!
         //int entries = 10; //store the 10 best overall!!!
         //double [][]final_result = fuseMatrix(init_population,selected_population,entries);
+        init_population = evalPopulation(init_population, num_repetitions);
+
         String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
         storeMatrix(fileName, init_population);
 
@@ -241,12 +244,9 @@ public class Gen_Agent {
     //prop_mutation = propability for a possible mutation
     //weights intervals needed for the possible mutation!
     //returns: new crossed and mutated array!!
-    private double[][] doCrossingandMutation(double[][]input_population,double to_keep,double size_new, double prop_mutation, double[] weigths_lower, double[] weights_upper){
-        int num_repetitions = 10;
+    private double[][] doCrossingandMutation(double[][] input_population, int num_repetitions = 10, double fraction = 0.25, int child_heuristic = 0, double prop_mutation= 0.05, double fraction_direct_pass = 0.3){
         int size_input = input_population.length;
-        int bestOfOld = (int) Math.round(0.3*input_population.length);
-        double fraction = 0.3;
-        int child_heuristic = 0;
+        int bestOfOld = (int) Math.round(fraction_direct_pass * input_population.length);
         double[][]new_population = new double[input_population.length][game.numFeatures()+1];
         //population with which games were played
         double[][]eval_population = new double[input_population.length][game.numFeatures()+1];
@@ -305,22 +305,22 @@ public class Gen_Agent {
     //this method fuses two matrices to get the best results!!!
     //num_entries == number entries the final matrix should have!!
     public double[][]fuseMatrix(double[][]matrix1,double[][]matrix2,int num_entries){
-        int lenght1 = Math.min(matrix1.length,num_entries);
+        int length1 = Math.min(matrix1.length,num_entries);
         int length2 = Math.min(matrix2.length,num_entries);
-        double[][] final_arr = new double[(lenght1+length2)][game.numFeatures()+1];
-        for (int i=0; i<lenght1;i++){
+        double[][] final_arr = new double[(length1+length2)][game.numFeatures()+1];
+        for (int i=0; i<length1;i++){
             for (int j = 0; j<game.numFeatures()+1; j++){
                 final_arr [i][j]=matrix1[i][j];
             }
         }
         for (int i=0; i<length2;i++){
             for (int j = 0; j<game.numFeatures()+1; j++){
-                final_arr [i+lenght1][j]=matrix2[i][j];
+                final_arr [i+length1][j]=matrix2[i][j];
             }
         }
         sortbyColumn(final_arr,game.numFeatures());
         //shrink to desired size!!
-        int des_size = Math.max(lenght1,length2); //only that there are no access errors!!!
+        int des_size = Math.max(length1,length2); //only that there are no access errors!!!
         double[][]return_arr = new double[des_size][game.numFeatures()+1];
         for (int i=0; i<des_size;i++){
             for (int j = 0; j<game.numFeatures()+1; j++){
