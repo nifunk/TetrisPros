@@ -141,9 +141,9 @@ public class Gen_Agent {
         String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
         storeMatrix(fileName, init_population);
 
-        System.out.println("You have completed "+final_result[0][game.numFeatures()]+" rows.");
+        System.out.println("You have completed "+init_population[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
-        System.out.println(Arrays.toString(final_result[0]));
+        System.out.println(Arrays.toString(init_population[0]));
     return new double[]{1};
 
     }
@@ -231,7 +231,7 @@ public class Gen_Agent {
                 max_score_idx = r; 
             }
         }
-        return max_score_idx
+        return max_score_idx;
     }
 
 
@@ -244,7 +244,7 @@ public class Gen_Agent {
     private double[][] doCrossingandMutation(double[][]input_population,double to_keep,double size_new, double prop_mutation, double[] weigths_lower, double[] weights_upper){
         int num_repetitions = 10;
         int size_input = input_population.length;
-        int bestOfOld = (int) Math.round(0.3*init_population.length);
+        int bestOfOld = (int) Math.round(0.3*input_population.length);
         double fraction = 0.3;
         int child_heuristic = 0;
         double[][]new_population = new double[input_population.length][game.numFeatures()+1];
