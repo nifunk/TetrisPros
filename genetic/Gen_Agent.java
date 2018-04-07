@@ -309,7 +309,7 @@ public class Gen_Agent {
                         child[j] = input_population[parent2][j];
                     }
                 }
-                child[num_features] = (input_population[parent1][num_features] + input_population[parent2][num_features])/2
+                child[num_features] = (input_population[parent1][num_features] + input_population[parent2][num_features])/2;
             }
 
             // put child in the new generation
