@@ -51,7 +51,7 @@ public class CTB extends Game
 
     @Override
     protected boolean terminal() {
-        return state.ball_pos.y > CTBConstants.window_height;
+        return state.ball_pos.y > CTBConstants.field_height;
     }
 
     @Override
@@ -63,11 +63,8 @@ public class CTB extends Game
     public int[] state()
     {
         int[] state_array  = new int[numStates()];
-        state_array[state.catcher_pos.x]                          = 1;
-        state_array[CTBConstants.window_width + state.ball_pos.x] = 1;
-
-        System.out.printf("Catcher = %d, Ball = %d\n", state.catcher_pos.x, state.ball_pos.x);
-
+        state_array[state.catcher_pos.x]                         = 1;
+        state_array[CTBConstants.field_width + state.ball_pos.x] = 1;
         return state_array;
     }
 
@@ -80,6 +77,10 @@ public class CTB extends Game
             frame.setVisible(false);
             frame.dispose();
             new_game.activateVisualisation();
+        }
+        if (encoder.encoderReady())
+        {
+            new_game.encoder = encoder;
         }
         return new_game;
     }
@@ -98,14 +99,14 @@ public class CTB extends Game
         final int x = state.catcher_pos.x;
         return (0 <= action_index && action_index < numActions()) &&
                 ((action_index == 1)
-                 || (action_index == 2 && x <= CTBConstants.window_width - CTBConstants.catcher_speed*2)
+                 || (action_index == 2 && x <= CTBConstants.field_width - CTBConstants.catcher_speed*2)
                  || (action_index == 0 && x >= CTBConstants.catcher_speed*2));
     }
 
     @Override
     public int numStates()
     {
-        return 2*CTBConstants.window_width;
+        return 2*CTBConstants.field_width;
     }
 
     @Override
@@ -118,8 +119,8 @@ public class CTB extends Game
         int[] temp_state_array  = new int[numStates()];
         //move the slider!
         temp_state_array[state.catcher_pos.x + actions()[0][action_index]] = 1;
-        temp_state_array[CTBConstants.window_width + state.ball_pos.x] = 1;
-        boolean game_over = ((state.ball_pos.y-CTBConstants.ball_speed) > CTBConstants.window_height);
+        temp_state_array[CTBConstants.field_width + state.ball_pos.x] = 1;
+        boolean game_over = ((state.ball_pos.y-CTBConstants.ball_speed) > CTBConstants.field_height);
 
         return new Results(0, temp_state_array, game_over);
     }
@@ -127,23 +128,34 @@ public class CTB extends Game
     @Override
     public double[] features(Results virtual_state_res)
     {
-        // TODO: HERE HAS TO GO THE AUTOENCODER!!
-        int[] firstHalf = Arrays.copyOfRange(virtual_state_res.state, 0, numStates()/2);
-        int[] secondHalf = Arrays.copyOfRange(virtual_state_res.state, numStates()/2, numStates());
-        int brett_pos = 0;
-        int ball_pos = 0;
-        for (int i=0; i<(numStates()/2);i++){
-            if (firstHalf[i]!=0){brett_pos=i;}
-            if (secondHalf[i]!=0){ball_pos=i;}
-    }
-        int distance = abs(brett_pos-ball_pos);
+        if(encoder.encoderReady())
+        {
+            double[] state_double = new double[virtual_state_res.state.length];
+            for(int i = 0; i < virtual_state_res.state.length; i++)
+                state_double[i] = virtual_state_res.state[i];
+            return encoder.encoding(state_double);
+        }
+        else
+        {
+            int[] firstHalf = Arrays.copyOfRange(virtual_state_res.state, 0, numStates()/2);
+            int[] secondHalf = Arrays.copyOfRange(virtual_state_res.state, numStates()/2, numStates());
+            int brett_pos = 0;
+            int ball_pos = 0;
+            for (int i=0; i<(numStates()/2);i++){
+                if (firstHalf[i]!=0){brett_pos=i;}
+                if (secondHalf[i]!=0){ball_pos=i;}
+            }
+            int distance = abs(brett_pos-ball_pos);
 
-        return new double[]{distance};
+            return new double[]{distance};
+        }
     }
 
     @Override
-    // TODO: apapt them depending how our autoencoder is designed to be!!!
-    public int numFeatures() { return 1; }
+    public int numFeatures()
+    {
+        return encoder.encoderReady() ? encoder.getEncoderSize() : 1;
+    }
 
     private class Panel extends JPanel
     {
@@ -153,12 +165,16 @@ public class CTB extends Game
         @Override
         protected void paintComponent(Graphics g)
         {
+            // Get window coordinates.
+            final double xb_win = (double)state.ball_pos.x/CTBConstants.field_width*CTBConstants.window_width;
+            final double yb_win = (double)(state.ball_pos.y - CTBConstants.ball_radius)/CTBConstants.field_height*CTBConstants.window_height;
+            final double xc_win = (double)state.catcher_pos.x/CTBConstants.field_width*CTBConstants.window_width;
+            final double yc_win = (double)state.catcher_pos.y/CTBConstants.field_height*CTBConstants.window_height;
+            // Painting.
             super.paintComponent(g);
             g.setColor(Color.RED);
-            g.fillOval(state.ball_pos.x, state.ball_pos.y - CTBConstants.ball_radius,
-                       CTBConstants.ball_radius * 2, CTBConstants.ball_radius * 2);
-            g.fillRect(state.catcher_pos.x, state.catcher_pos.y,
-                       CTBConstants.ball_radius * 2, 10);
+            g.fillOval((int)xb_win, (int)yb_win, 20, 20);
+            g.fillRect((int)xc_win, (int)yc_win, 20, 10);
         }
 
         @Override
@@ -194,8 +210,10 @@ public class CTB extends Game
         double[][] samples = new double[num_samples][numStates()];
         for (int k = 0; k < num_samples; ++k)
         {
-            final int random_index   = generator.nextInt(numStates());
-            samples[k][random_index] = 1.0;
+            final int catcher_index   = generator.nextInt(numStates()/2);
+            samples[k][catcher_index] = 1.0;
+            final int ball_index      = generator.nextInt(numStates()/2);
+            samples[k][numStates()/2 + ball_index] = 1.0;
         }
         return samples;
     }

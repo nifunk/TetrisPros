@@ -13,14 +13,42 @@ import java.util.Random;
 
 public class Gen_Agent {
 
-    private Game game;
-    private double[] weights;
-    private boolean weights_loaded;
+    private Game        game;
+    private double[]    weights;
+    private boolean     weights_loaded;
 
-    public Gen_Agent(Game game) {
+    public Gen_Agent(Game game)
+    {
         this.game = game;
         //this.weights = new double[]{-0.51,0.76,-0.3566,-0.18448}; //internet weights
         //this.weights = new double[]{-3.459111196332234, 8.798745927744655, -17.509339945947517, -4.244590461223442}; //best trained so far!
+        this.weights = new double[game.numFeatures()]; //only to initialize
+        this.weights_loaded = false;
+    }
+
+    public Gen_Agent(Game game, final String encoder_load_file)
+    {
+        // Define game.
+        this.game = game;
+        // Start auto encoder.
+        System.out.println("\nGenAgent: Loading auto encoder");
+        this.game.encoder.buildNetwork(game.numStates());
+        this.game.encoder.load("resources/encoder/"+encoder_load_file);
+        // Initialise genetic weights.
+        this.weights = new double[game.numFeatures()]; //only to initialize
+        this.weights_loaded = false;
+    }
+
+    public Gen_Agent(Game game, final String encoder_save_file, final int num_samples)
+    {
+        // Define game.
+        this.game = game;
+        // Start auto encoder.
+        System.out.println("\nGenAgent: Adapting auto encoder");
+        this.game.encoder.buildNetwork(game.numStates());
+        this.game.encoder.adapt(game.trainingStates(num_samples));
+        this.game.encoder.store("resources/encoder/"+encoder_save_file);
+        // Initialise genetic weights.
         this.weights = new double[game.numFeatures()]; //only to initialize
         this.weights_loaded = false;
     }
@@ -94,11 +122,12 @@ public class Gen_Agent {
     }
 
     public double[] do_genetic_learning(){
+        System.out.println("Simple agent performance was launched...");
         //STEP1: make a first random population
         //general assumption: feature 0,2,3 must be penalized
         //feature 1 must be pushed -> positive
 
-        int size_init_population = 10; //was 1000
+        int size_init_population = 500; //was 1000
         int num_repetitions = 10;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[game.numFeatures()];
@@ -143,13 +172,15 @@ public class Gen_Agent {
         int entries = 10; //store the 10 best overall!!!
         double [][]final_result = fuseMatrix(init_population,selected_population,entries);
         String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
-        storeMatrix(fileName,final_result);
+        storeMatrix("resources/genetic/"+fileName,final_result);
 
         System.out.println("You have completed "+final_result[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
         System.out.println(Arrays.toString(final_result[0]));
-    return new double[]{1};
 
+        this.weights_loaded = true;
+
+        return new double[]{1};
     }
 
 
@@ -231,7 +262,9 @@ public class Gen_Agent {
     //prop_mutation = propability for a possible mutation
     //weights intervals needed for the possible mutation!
     //returns: new crossed and mutated array!!
-    private double[][] doCrossingandMutation(double[][]input_population,double to_keep,double size_new, double prop_mutation, double[] weigths_lower, double[] weights_upper){
+    private double[][] doCrossingandMutation(double[][]input_population,double to_keep,double size_new,
+                                             double prop_mutation, double[] weigths_lower, double[] weights_upper){
+        System.out.println("Genetic learning was launched...");
         int size_input = input_population.length;
         int num_new_generated = 2*(int) Math.round(size_input*size_new); //since crossing over is mutual*2
         int last_idx = (int) Math.round(size_input*to_keep); //last index of input array we consider!!!
@@ -324,7 +357,7 @@ public class Gen_Agent {
         int num_features_txt = 0;
         try
         {
-            final BufferedReader in = new BufferedReader(new FileReader(filename));
+            final BufferedReader in = new BufferedReader(new FileReader("resources/genetic/"+filename));
             String line;
             int desired_weights = 2;
             int offset = 1; //there stand the number of weights!!!
@@ -360,7 +393,7 @@ public class Gen_Agent {
                     }
                 }
                 i++;
-                }
+            }
 
         } catch (IOException e) { e.printStackTrace(); }
         System.out.println("Loaded Desired weights in " + filename);

@@ -7,17 +7,17 @@ public class CTBState {
     public Position ball_pos  = new Position(0, 0);
     private Velocity ball_vel = new Velocity(0, CTBConstants.ball_speed);
 
-    public Position catcher_pos  = new Position(0,CTBConstants.window_height - 50);
+    public Position catcher_pos  = new Position(0,CTBConstants.field_height - 50);
     private Velocity catcher_vel = new Velocity(0, 0);
 
     public CTBState()
     {
         final Random generator = new Random();
-        ball_pos.x = generator.nextInt(CTBConstants.window_width - 2*CTBConstants.ball_radius);
+        ball_pos.x = generator.nextInt(CTBConstants.field_width - 2*CTBConstants.ball_radius);
         ball_pos.x+= CTBConstants.ball_radius;
-        catcher_pos.x = generator.nextInt(CTBConstants.window_width);
+        catcher_pos.x = generator.nextInt(CTBConstants.field_width);
         catcher_pos.x = Math.max(0, catcher_pos.x);
-        catcher_pos.x = Math.min(catcher_pos.x, CTBConstants.window_width);
+        catcher_pos.x = Math.min(catcher_pos.x, CTBConstants.field_width);
     }
 
     public void update(final int action)
