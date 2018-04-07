@@ -62,12 +62,21 @@ public class Gen_Agent {
         //Step5: choose best move
             double best_score=score[0];
             int best_move=0;
-            for(int i=1;i<all_actions;i++){
-                if (score[i]>best_score){
+            //find first valid move
+            for(int i=0;i<all_actions;i++){
+                if (game.checkAction(i)){
+                    best_score = score[i];
+                    best_move = i;
+                    break;
+                }
+            }
+
+            for(int i=(best_move+1);i<all_actions;i++){
+                if ((score[i]>best_score)&game.checkAction(i)){
                     best_score = score[i];
                     best_move = i;
                 }
-            }
+			}
         //Step6: execute this best move
             results = game.step(best_move);
         //Step7: save reward such that You know how succesfull these weights were!!
