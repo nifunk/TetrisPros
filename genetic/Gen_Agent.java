@@ -139,7 +139,6 @@ public class Gen_Agent {
             
             init_population = doCrossingandMutation(init_population, num_repetitions, fraction, child_heuristic, prop_mutation, fraction_direct_pass);
             System.out.println( (i+1) + " Selected population created....");
-
         }
        
 
@@ -149,8 +148,9 @@ public class Gen_Agent {
         //double [][]final_result = fuseMatrix(init_population,selected_population,entries);
         init_population = evalPopulation(init_population, num_repetitions);
 
-        String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
-        storeMatrix(fileName, init_population);
+        //String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
+        String fileName = size_init_population + "_" + numGenerations + "_" + child_heuristic + ".txt";
+        storeMatrix(fileName, init_population, numGenerations, size_init_population, child_heuristic);
 
         System.out.println("You have completed "+init_population[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
@@ -290,6 +290,7 @@ public class Gen_Agent {
         double[][]new_population = new double[input_population.length][game.numFeatures()+1];
         //population with which games were played
         double[][]eval_population = new double[input_population.length][game.numFeatures()+1];
+        int num_features = game.numFeatures();
 
         eval_population = evalPopulation(input_population, num_repetitions); // for the parent population
         double worst_performer_score = eval_population[eval_population.length-1][game.numFeatures()];
@@ -297,7 +298,7 @@ public class Gen_Agent {
 
         //take the best 30% of the old generation (init generation)
         for (int i = 0 ; i < bestOfOld ; i++) {
-            for (int j = 0; j < game.numFeatures(); j++) {
+            for (int j = 0; j < num_features; j++) {
                 new_population[i][j] = eval_population[i][j];
             }
         }
@@ -325,10 +326,24 @@ public class Gen_Agent {
 	                child = evalChild(child, num_repetitions);
 	            }
 	            //heuristic 2
-	            else{
+	            else if (child_heuristic == 1) {
 	                for(int j = 0; j < game.numFeatures() + 1; j++){
 	                    child[j] = (input_population[parent1][j] + input_population[parent2][j])/2;
 	                }
+	                child = evalChild(child, num_repetitions);
+	            }
+	            //heuristic 3 - mix n match weights from both parent 1 and parent 2
+	            else {
+	            	for (int j = 0; j < num_features; j++) {
+	                    double rand_val = getRandom(0, 1);
+	                    if (rand_val > 0.5){
+	                        child[j] = input_population[parent1][j];
+	                    }
+	                    else{
+	                        child[j] = input_population[parent2][j];
+	                    }
+	                }
+	                child[num_features] = (input_population[parent1][num_features] + input_population[parent2][num_features])/2;
 	                child = evalChild(child, num_repetitions);
 	            }
 	            iter++;
@@ -343,7 +358,6 @@ public class Gen_Agent {
                     new_population[i][j] = new_population[i][j] * getRandom(0, 1.5);
                 }
             }
-
         }
 
         return new_population;
@@ -378,10 +392,16 @@ public class Gen_Agent {
     }
 
 
-    public void storeMatrix(final String filename, double[][]matrix) {
+    public void storeMatrix(final String filename, double[][]matrix, int generations, int size_init_population, int heuristic) {
         try {
             final FileWriter fw = new FileWriter(filename);
             fw.write(getCurrentTimeStamp());
+            fw.write("\n");
+            fw.write("Number of generations: " + generations);
+            fw.write("\n");
+            fw.write("Size of population: " + size_init_population);
+            fw.write("\n");
+            fw.write("Heuristic " + heuristic);
             fw.write("\n");
             for (double[] action_rewards : matrix) {
                 for (double reward : action_rewards) {
