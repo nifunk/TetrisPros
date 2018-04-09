@@ -1,0 +1,3 @@
+Maybe store 50 best and add them to the other initial populations such that You always have the incredibly best ones
+Implement difference in holes and other difference features
+Improve crossing over etc. mutation and stuff procedure

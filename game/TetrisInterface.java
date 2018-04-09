@@ -421,6 +421,8 @@ public class TetrisInterface extends Game
                 bumpieness = bumpieness + abs(height_map[j]-height_map[j-1]);
             }
 
+            //TODO: INCLUDE DIFFERENCE FEATURES SEE WHEN TREES FALL WEBSITE!!!
+
             //return new double[]{total_num_holes,num_cleared_rows,aggregate_height,bumpieness};
             //new: 11 features from paper!!!
             return new double[]{max_pile_height,total_num_holes,conn_num_holes,num_cleared_rows,max_altitude_difference,max_well_depth,sum_of_wells,num_blocks,weighted_blocks,hor_transitions,ver_transitions};

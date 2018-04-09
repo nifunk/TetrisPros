@@ -132,9 +132,12 @@ public class Gen_Agent {
         int num_repetitions = 10;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[game.numFeatures()];
-        Arrays.fill(weights_lowerbound, -100.0);
+        Arrays.fill(weights_lowerbound, -1000.0);
         double[]weights_upperbound = new double[game.numFeatures()];
-        Arrays.fill(weights_upperbound, 100.0);
+        Arrays.fill(weights_upperbound, 1000.0);
+        //manual cheating:
+        //weights_lowerbound[3]=0;
+        //weights_upperbound[3]=1000;
 
         //generate initial population
         for (int i=0;i<size_init_population;i++){

@@ -26,7 +26,7 @@ public class Player {
 			//FROM PAPER:
 			//agent.loadMatrix("11_feat_paper.txt");
 			//BEST OWN TRAINED:
-			agent.loadMatrix("201804091724.txt");
+			agent.loadMatrix("11_feat_ourbest.txt");
 			////let the player act
 			System.out.println("Simple agent performance was launched...");
 			////agent.getGame().activateVisualisation();
