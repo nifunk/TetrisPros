@@ -93,7 +93,9 @@ public class TetrisInterface extends Game
         int[][] field = _state.getField();
         //System.out.println(Arrays.deepToString(field));
         int height = field.length; //height of field
+        //System.out.println(height);
         int width = field[0].length; //width of field
+        //System.out.println(width);
         //System.out.printf("size is %d x %d%n", len1, len2);
 
         //building final _state array:
@@ -155,7 +157,7 @@ public class TetrisInterface extends Game
 
     public int numStates(){ return _state.ROWS*_state.COLS; }
 
-    public int numActions(){ return 40; }
+    public int numActions(){ return (_state.COLS*4); }
 
     // for genetic algorithm
     //input: current _state which includes the action

@@ -355,6 +355,7 @@ public class Gen_Agent {
     public void loadMatrix(final String filename)
     {
         int num_features_txt = 0;
+        //System.out.println("resources/genetic/"+filename);
         try
         {
             final BufferedReader in = new BufferedReader(new FileReader("resources/genetic/"+filename));

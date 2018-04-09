@@ -16,23 +16,27 @@ public class Player {
         ////agent.getGame().activateVisualisation();
     	//agent.perform();
 
-		//For Genetic algorithm:
-		//Gen_Agent agent = new Gen_Agent(new TetrisInterface());
-		//agent.loadMatrix("resources/genetic/201803121313.txt");
+		//For Genetic algorithm: -> HAND CRAFTED FEATURES:
+		Gen_Agent agent = new Gen_Agent(new TetrisInterface());
+		agent.loadMatrix("best_4_features.txt");
 		//let the player act
-		//System.out.println("Simple agent performance was launched...");
-		//agent.getGame().activateVisualisation();
-		//agent.perform();
+		System.out.println("Simple agent performance was launched...");
+		agent.getGame().activateVisualisation();
+		agent.perform();
+
 		//let the player learn
 		//System.out.println("Genetic qlearning was launched...");
 		//agent.do_genetic_learning();
 
-		// Train auto encoder.
-		Gen_Agent agent = new Gen_Agent(new TetrisInterface(), "test_tetris.eg", 200000);
-		// Do not train
+
+
+
+		// TRAIN AUTO ENCODER
+		//Gen_Agent agent = new Gen_Agent(new TetrisInterface(), "test_tetris.eg", 200000);
+		// DO NOT TRAIN AUTOENCODER
 		//Gen_Agent agent = new Gen_Agent(new TetrisInterface(), "test_tetris.eg");
 		// Let the player learn.
-		agent.do_genetic_learning();
+		//agent.do_genetic_learning();
 		// Let the player act.
 		//agent.loadMatrix("ctb_enc.txt");
 		//agent.getGame().activateVisualisation();
