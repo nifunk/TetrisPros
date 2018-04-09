@@ -72,7 +72,8 @@ public class Gen_Agent {
         while (! results.terminated) {
             double[] score = new double[all_actions]; //to eval the moves
             //the higher positive!! the score the better so preinit with -10000 so that no illegal moves taken
-            Arrays.fill(score, -100000.0);
+            Arrays.fill(score, Double.NEGATIVE_INFINITY);
+            //Arrays.fill(score, Double.POSITIVE_INFINITY);
         //STEP3: if valid action - play perform the actions virtually and compute the features
             for (int move=0; move<all_actions; move++){
                 if (game.checkAction(move)){
@@ -131,9 +132,9 @@ public class Gen_Agent {
         int num_repetitions = 10;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[game.numFeatures()];
-        Arrays.fill(weights_lowerbound, -40.0);
+        Arrays.fill(weights_lowerbound, -1000.0);
         double[]weights_upperbound = new double[game.numFeatures()];
-        Arrays.fill(weights_upperbound, 40.0);
+        Arrays.fill(weights_upperbound, 1000.0);
 
         //generate initial population
         for (int i=0;i<size_init_population;i++){
@@ -398,6 +399,7 @@ public class Gen_Agent {
 
         } catch (IOException e) { e.printStackTrace(); }
         System.out.println("Loaded Desired weights in " + filename);
+        System.out.println(Arrays.toString(this.weights));
     }
 
     public String getCurrentTimeStamp() {

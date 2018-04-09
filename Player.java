@@ -18,10 +18,11 @@ public class Player {
 
 		//For Genetic algorithm: -> HAND CRAFTED FEATURES:
 		Gen_Agent agent = new Gen_Agent(new TetrisInterface());
-		agent.loadMatrix("best_4_features.txt");
+		//agent.loadMatrix("best_4_features.txt");
+		agent.loadMatrix("11_feat_paper.txt");
 		//let the player act
 		System.out.println("Simple agent performance was launched...");
-		agent.getGame().activateVisualisation();
+		//agent.getGame().activateVisualisation();
 		agent.perform();
 
 		//let the player learn
