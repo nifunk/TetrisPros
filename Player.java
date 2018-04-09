@@ -18,19 +18,26 @@ public class Player {
 
 		//For Genetic algorithm: -> HAND CRAFTED FEATURES:
 		Gen_Agent agent = new Gen_Agent(new TetrisInterface());
-		//agent.loadMatrix("best_4_features.txt");
-		agent.loadMatrix("11_feat_paper.txt");
-		//let the player act
-		System.out.println("Simple agent performance was launched...");
-		//agent.getGame().activateVisualisation();
-		agent.perform();
+		boolean want_to_train = false;
 
-		//let the player learn
-		//System.out.println("Genetic qlearning was launched...");
-		//agent.do_genetic_learning();
+		if(!want_to_train){
+			//SIMPLY PLAY
+			//agent.loadMatrix("best_4_features.txt");
+			//FROM PAPER:
+			//agent.loadMatrix("11_feat_paper.txt");
+			//BEST OWN TRAINED:
+			agent.loadMatrix("201804091724.txt");
+			////let the player act
+			System.out.println("Simple agent performance was launched...");
+			////agent.getGame().activateVisualisation();
+			agent.perform();
 
-
-
+		}
+		else{
+			//let the player learn
+			System.out.println("Genetic qlearning was launched...");
+			agent.do_genetic_learning();
+		}
 
 		// TRAIN AUTO ENCODER
 		//Gen_Agent agent = new Gen_Agent(new TetrisInterface(), "test_tetris.eg", 200000);

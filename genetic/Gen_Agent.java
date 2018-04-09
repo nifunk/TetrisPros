@@ -132,9 +132,9 @@ public class Gen_Agent {
         int num_repetitions = 10;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[game.numFeatures()];
-        Arrays.fill(weights_lowerbound, -1000.0);
+        Arrays.fill(weights_lowerbound, -100.0);
         double[]weights_upperbound = new double[game.numFeatures()];
-        Arrays.fill(weights_upperbound, 1000.0);
+        Arrays.fill(weights_upperbound, 100.0);
 
         //generate initial population
         for (int i=0;i<size_init_population;i++){
@@ -204,10 +204,15 @@ public class Gen_Agent {
 
                 // To sort in descending order revert
                 // the '>' Operator
-                if (entry1[col] > entry2[col])
+                if (entry1[col] == entry2[col]){
+                    return 0;
+                }
+                else if (entry1[col] > entry2[col]) {
                     return -1;
-                else
+                }
+                else {
                     return 1;
+                }
             }
         });  // End of function call sort().
     }
