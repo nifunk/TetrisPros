@@ -43,7 +43,10 @@ public class Player {
 			////let the player act
 			System.out.println("Simple agent performance was launched...");
 			////agent.getGame().activateVisualisation();
-			agent.perform();
+			Gen_Agent.Performer performer = agent.new Performer();
+            performer.run();
+            performer.getVal();
+            // agent.perform();
 
 		}
 		else{

@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Gen_Agent {
 
@@ -53,84 +55,95 @@ public class Gen_Agent {
         this.weights_loaded = false;
     }*/
 
-    public int perform() {
-        if(!this.weights_loaded){throw new java.lang.Error("weights not loaded!");}
-        //just the function which really does the performance!
-        //have a feature weight vector!
-        //init reward!
-        double total_reward = 0;
-        //STEP1: get all actions
-        int all_actions = game.numActions();
-        int num_features = game.numFeatures();
-        //feature vector: dim1=action idx; dim2= features to this index
-        double[] weights_ = this.weights;
-        // Important: have to take measure such that we dont choose illegal move!!
+    public class Performer implements Runnable {
 
-        //Need this?! - doubt it
-        Results results  = new Results(0, new int[]{0}, false);
+        private int retVal;
 
-        while (! results.terminated) {
-            double[] score = new double[all_actions]; //to eval the moves
-            //the higher positive!! the score the better so preinit with -10000 so that no illegal moves taken
-            Arrays.fill(score, Double.NEGATIVE_INFINITY);
-            //Arrays.fill(score, Double.POSITIVE_INFINITY);
-        //STEP3: if valid action - play perform the actions virtually and compute the features
-            for (int move=0; move<all_actions; move++){
-                if (game.checkAction(move)){
-                    //calculate the features on the initial board configuration:
-                    //TODO: here calculate the features on the Ausgangslage!!
-                    Results outcome = game.virtual_move(game.state(),move);
-                    if (outcome.terminated!=true){ //this means game is not over in this drive!
-                        //calculate all features!!!
-                        //TODO: replace this function by operator overloading to calculate differential features!!!
-                        double[] features = game.features(outcome);
-                        double score_ = 0;
-                        //calculate the score
-                        for (int k=0; k<num_features;k++){
-                            score_ = score_ + weights[k]*features[k];
-                        }
-                        score[move] = score_;
-                    }
-
-                }
-            }
-
-        //Step5: choose best move
-            double best_score = score[0];
-            int best_move = 0;
-            //find first valid move
-            for(int i=0;i<all_actions;i++){
-                if (game.checkAction(i)){
-                    best_score = score[i];
-                    best_move = i;
-                    break;
-                }
-            }
-
-            for(int i=(best_move+1);i<all_actions;i++){
-                if ((score[i]>best_score)&game.checkAction(i)){
-                    best_score = score[i];
-                    best_move = i;
-                    break;
-                }
-            }
-
-            for(int i=(best_move+1);i<all_actions;i++){
-                if ((score[i]>best_score)&game.checkAction(i)){
-                    best_score = score[i];
-                    best_move = i;
-                }
-			}
-        //Step6: execute this best move
-            results = game.step(best_move);
-        //Step7: save reward such that You know how succesfull these weights were!!
-            //TETRIS: NUMBER CLEARED ROWS!
-            //CTB: -1* absolute distance between ball and board -> if we search for maximum we find the best!!!
-            total_reward = results.reward;
+        public int getVal() {
+            return this.retVal;
         }
-        System.out.println("You have completed "+total_reward+" rows.");
-        game = game.restart();
-        return (int)total_reward;
+
+        // public int perform() {
+        public void run() {
+            if(!Gen_Agent.this.weights_loaded){throw new java.lang.Error("weights not loaded!");}
+            //just the function which really does the performance!
+            //have a feature weight vector!
+            //init reward!
+            double total_reward = 0;
+            //STEP1: get all actions
+            int all_actions = game.numActions();
+            int num_features = game.numFeatures();
+            //feature vector: dim1=action idx; dim2= features to this index
+            double[] weights_ = Gen_Agent.this.weights;
+            // Important: have to take measure such that we dont choose illegal move!!
+
+            //Need this?! - doubt it
+            Results results  = new Results(0, new int[]{0}, false);
+
+            while (! results.terminated) {
+                double[] score = new double[all_actions]; //to eval the moves
+                //the higher positive!! the score the better so preinit with -10000 so that no illegal moves taken
+                Arrays.fill(score, Double.NEGATIVE_INFINITY);
+                //Arrays.fill(score, Double.POSITIVE_INFINITY);
+            //STEP3: if valid action - play perform the actions virtually and compute the features
+                for (int move=0; move<all_actions; move++){
+                    if (game.checkAction(move)){
+                        //calculate the features on the initial board configuration:
+                        //TODO: here calculate the features on the Ausgangslage!!
+                        Results outcome = game.virtual_move(game.state(),move);
+                        if (outcome.terminated!=true){ //this means game is not over in this drive!
+                            //calculate all features!!!
+                            //TODO: replace this function by operator overloading to calculate differential features!!!
+                            double[] features = game.features(outcome);
+                            double score_ = 0;
+                            //calculate the score
+                            for (int k=0; k<num_features;k++){
+                                score_ = score_ + weights[k]*features[k];
+                            }
+                            score[move] = score_;
+                        }
+
+                    }
+                }
+
+            //Step5: choose best move
+                double best_score = score[0];
+                int best_move = 0;
+                //find first valid move
+                for(int i=0;i<all_actions;i++){
+                    if (game.checkAction(i)){
+                        best_score = score[i];
+                        best_move = i;
+                        break;
+                    }
+                }
+
+                for(int i=(best_move+1);i<all_actions;i++){
+                    if ((score[i]>best_score)&game.checkAction(i)){
+                        best_score = score[i];
+                        best_move = i;
+                        break;
+                    }
+                }
+
+                for(int i=(best_move+1);i<all_actions;i++){
+                    if ((score[i]>best_score)&game.checkAction(i)){
+                        best_score = score[i];
+                        best_move = i;
+                    }
+    			}
+            //Step6: execute this best move
+                results = game.step(best_move);
+            //Step7: save reward such that You know how succesfull these weights were!!
+                //TETRIS: NUMBER CLEARED ROWS!
+                //CTB: -1* absolute distance between ball and board -> if we search for maximum we find the best!!!
+                total_reward = results.reward;
+            }
+            System.out.println("You have completed "+total_reward+" rows.");
+            game = game.restart();
+            // return (int)total_reward;
+            this.retVal = (int)total_reward;
+        }
     }
 
     public double[] do_genetic_learning(int num_generations, int population_size, int child_heuristic, 
@@ -268,10 +281,15 @@ public class Gen_Agent {
                 this.weights[j] = population[i][j];
             }
             //play num_repetition times
+            ExecutorService executor = Executors.newFixedThreadPool(num_repetitions);
             double[] store_score = new double[num_repetitions];
             for (int j = 0; j < num_repetitions; j++) {
-                store_score[j] = this.perform();
+                Performer performer = new Performer();
+                executor.execute(performer);
+                store_score[j] = performer.getVal();
             }
+
+            executor.shutdown();
 
             double score_best = store_score[0];
 
@@ -303,10 +321,15 @@ public class Gen_Agent {
         }
         
         //play num_repetition times
+        ExecutorService executor = Executors.newFixedThreadPool(num_repetitions);
         double[] store_score = new double[num_repetitions];
         for (int j = 0; j < num_repetitions; j++) {
-            store_score[j] = this.perform();
+            Performer performer = new Performer();
+            executor.execute(performer);
+            store_score[j] = performer.getVal();
         }
+
+        executor.shutdown();
 
         double score_best = store_score[0];
 
