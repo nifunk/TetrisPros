@@ -1,9 +1,22 @@
 import game.TetrisInterface;
 import genetic.Gen_Agent;
 
+
 public class Player {
+	private static int num_generations, population_size, child_heuristic;
+	private static double fraction, prop_mutation, fraction_direct_pass;
 
 	public static void main(String[] args) {
+		//Arguments to pass for running
+		if(args.length == 6)
+		{
+			num_generations = Integer.parseInt(args[0]);
+			population_size = Integer.parseInt(args[1]);
+			child_heuristic = Integer.parseInt(args[2]); 
+			fraction = Double.parseDouble(args[3]);
+	        prop_mutation= Double.parseDouble(args[4]);
+	        fraction_direct_pass = Double.parseDouble(args[5]);
+		}
 		new Player();
 	}
 
@@ -36,7 +49,7 @@ public class Player {
 		else{
 			//let the player learn
 			System.out.println("Genetic qlearning was launched...");
-			agent.do_genetic_learning();
+			agent.do_genetic_learning(num_generations, population_size, child_heuristic, fraction, prop_mutation, fraction_direct_pass);
 		}
 
 		// TRAIN AUTO ENCODER

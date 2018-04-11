@@ -133,13 +133,14 @@ public class Gen_Agent {
         return (int)total_reward;
     }
 
-    public double[] do_genetic_learning(){
+    public double[] do_genetic_learning(int num_generations, int population_size, int child_heuristic, 
+        double fraction, double prop_mutation, double fraction_direct_pass){
         System.out.println("Simple agent performance was launched...");
         //STEP1: make a first random population
         //general assumption: feature 0,2,3 must be penalized
         //feature 1 must be pushed -> positive
 
-        int size_init_population = 10; //was 500
+        int size_init_population = population_size; //was 500
         int num_repetitions = 10;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[game.numFeatures()];
@@ -170,11 +171,12 @@ public class Gen_Agent {
         // double size_new_pop = 0.3; //size of new population relative to initial population (should be smaller than 0.5)
         //reason: is twice this percentage later cause cross over is mutual -> real percentace = 2*size_new_pop
 
-        int numGenerations = 10; //100
-        double fraction = 0.25;
-        int child_heuristic = 0; 
-        double prop_mutation= 0.05;
-        double fraction_direct_pass = 0.3;
+        int numGenerations = num_generations; //100
+        //double fraction = fraction;
+        //int child_heuristic = child_heuristic; 
+        //double prop_mutation= prop_mutation;
+        //double fraction_direct_pass = fraction_direct_pass;
+
 
         /*TODO: new function that will use doCrossingMutation and will generate the new generation from the old one in as follows:
             - take 25-30% of the best performing parents as children
@@ -393,19 +395,31 @@ public class Gen_Agent {
 	                }
 	                child = evalChild(child, num_repetitions);
 	            }
-	            //heuristic 3 - mix n match weights from both parent 1 and parent 2
+                //heuristic 3 - mix n match weights from both parent 1 and parent 2
+                else if(child_heuristic == 2) {
+                    for (int j = 0; j < num_features; j++) {
+                        double rand_val = getRandom(0, 1);
+                        if (rand_val > 0.5){
+                            child[j] = input_population[parent1][j];
+                        }
+                        else{
+                            child[j] = input_population[parent2][j];
+                        }
+                    }
+                    child[num_features] = (input_population[parent1][num_features] + input_population[parent2][num_features])/2;
+                    child = evalChild(child, num_repetitions);
+                }
+                //heuristic 4 - set a line
 	            else {
-	            	for (int j = 0; j < num_features; j++) {
-	                    double rand_val = getRandom(0, 1);
-	                    if (rand_val > 0.5){
-	                        child[j] = input_population[parent1][j];
-	                    }
-	                    else{
-	                        child[j] = input_population[parent2][j];
-	                    }
-	                }
-	                child[num_features] = (input_population[parent1][num_features] + input_population[parent2][num_features])/2;
-	                child = evalChild(child, num_repetitions);
+                    int line = (int) Math.round(getRandom(0, num_features));
+                    for (int j = 0; j < line; j++) {
+                            child[j] = input_population[parent1][j];
+                    }
+                    for (int j = line; j < num_features; j++) {
+                            child[j] = input_population[parent1][j];
+                    }
+                    child[num_features] = (input_population[parent1][num_features] + input_population[parent2][num_features])/2;
+                    child = evalChild(child, num_repetitions);
 	            }
 	            iter++;
             } while (child[game.numFeatures()] < worst_performer_score && iter < 5);
