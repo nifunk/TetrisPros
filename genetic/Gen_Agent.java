@@ -477,6 +477,7 @@ public class Gen_Agent {
             fw.write("Size of population: " + size_init_population);
             fw.write("\n");
             fw.write("Heuristic " + heuristic);
+            fw.write("\n");
             fw.write(Integer.toString(game.numFeatures()));
             fw.write("\n");
             for (double[] action_rewards : matrix) {
