@@ -101,6 +101,7 @@ public class Gen_Agent {
         //generate initial population
         for (int i=0;i<size_init_population;i++){
             for (int j = 0; j<game.numFeatures(); j++){
+                //TODO: instead of always starting from a completely random population, add some good individuals from the beginning
                 init_population[i][j]= getRandom(weights_lowerbound[j],weights_upperbound[j]);
             }
         }
