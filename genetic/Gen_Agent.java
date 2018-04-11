@@ -77,9 +77,12 @@ public class Gen_Agent {
         //STEP3: if valid action - play perform the actions virtually and compute the features
             for (int move=0; move<all_actions; move++){
                 if (game.checkAction(move)){
+                    //calculate the features on the initial board configuration:
+                    //TODO: here calculate the features on the Ausgangslage!!
                     Results outcome = game.virtual_move(game.state(),move);
                     if (outcome.terminated!=true){ //this means game is not over in this drive!
                         //calculate all features!!!
+                        //TODO: replace this function by operator overloading to calculate differential features!!!
                         double[] features = game.features(outcome);
                         double score_ = 0;
                         //calculate the score
@@ -128,16 +131,17 @@ public class Gen_Agent {
         //general assumption: feature 0,2,3 must be penalized
         //feature 1 must be pushed -> positive
 
-        int size_init_population = 500; //was 1000
+        int size_init_population = 3000; //was 1000
         int num_repetitions = 10;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[game.numFeatures()];
-        Arrays.fill(weights_lowerbound, -1000.0);
+        Arrays.fill(weights_lowerbound, -100000.0);
         double[]weights_upperbound = new double[game.numFeatures()];
-        Arrays.fill(weights_upperbound, 1000.0);
+        Arrays.fill(weights_upperbound, 100000.0);
         //manual cheating:
-        //weights_lowerbound[3]=0;
-        //weights_upperbound[3]=1000;
+        Arrays.fill(weights_upperbound, 0.0);
+        weights_lowerbound[3]=0;
+        weights_upperbound[3]=100000;
 
         //generate initial population
         for (int i=0;i<size_init_population;i++){
@@ -178,7 +182,7 @@ public class Gen_Agent {
         String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
         storeMatrix("resources/genetic/"+fileName,final_result);
 
-        System.out.println("You have completed "+final_result[0][game.numFeatures()]+" rows.");
+        //System.out.println("You have completed "+final_result[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
         System.out.println(Arrays.toString(final_result[0]));
 

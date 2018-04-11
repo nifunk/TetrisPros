@@ -1,3 +1,7 @@
 Maybe store 50 best and add them to the other initial populations such that You always have the incredibly best ones
-Implement difference in holes and other difference features
+Implement difference in holes and other difference features!!! Function Overloading
 Improve crossing over etc. mutation and stuff procedure
+Maybe look ahead one step!!!
+Maybe exponential penalty function
+Maybe store best (zwischendurch) features!!!
+
