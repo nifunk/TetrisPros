@@ -18,7 +18,7 @@ public class Player {
 
 		//For Genetic algorithm: -> HAND CRAFTED FEATURES:
 		Gen_Agent agent = new Gen_Agent(new TetrisInterface());
-		boolean want_to_train = false;
+		boolean want_to_train = true;
 
 		if(!want_to_train){
 			//SIMPLY PLAY

@@ -139,7 +139,7 @@ public class Gen_Agent {
         //general assumption: feature 0,2,3 must be penalized
         //feature 1 must be pushed -> positive
 
-        int size_init_population = 50; //was 500
+        int size_init_population = 10; //was 500
         int num_repetitions = 10;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[game.numFeatures()];
@@ -203,9 +203,9 @@ public class Gen_Agent {
         //double [][]final_result = fuseMatrix(init_population,selected_population,entries);
         init_population = evalPopulation(init_population, num_repetitions);
 
-        //String fileName = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
-        String fileName = size_init_population + "_" + numGenerations + "_" + child_heuristic + ".txt";
-        storeMatrix(fileName, init_population, numGenerations, size_init_population, child_heuristic);
+        String dataString = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
+        String fileName = size_init_population + "_" + numGenerations + "_" + child_heuristic + "_" + dataString + ".txt";
+        storeMatrix("resources/genetic/" + fileName, init_population, numGenerations, size_init_population, child_heuristic);
 
         System.out.println("You have completed "+init_population[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
