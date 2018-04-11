@@ -206,7 +206,7 @@ public class Gen_Agent {
         init_population = evalPopulation(init_population, num_repetitions);
 
         String dataString = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
-        String fileName = size_init_population + "_" + numGenerations + "_" + child_heuristic + "_" + dataString + ".txt";
+        String fileName = size_init_population + "_" + numGenerations + "_" + child_heuristic + "_" + dataString;
         storeMatrix("resources/genetic/" + fileName, init_population, numGenerations, size_init_population, child_heuristic);
 
         System.out.println("You have completed "+init_population[0][game.numFeatures()]+" rows.");
