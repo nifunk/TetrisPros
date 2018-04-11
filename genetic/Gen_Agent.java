@@ -3,7 +3,7 @@ package genetic;
 import game.Game;
 import game.Results;
 
-import java.io.FileWriter;
+import java.io.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -13,16 +13,48 @@ import java.util.Random;
 
 public class Gen_Agent {
 
-    private Game game;
-    private double[] weights;
+    private Game        game;
+    private double[]    weights;
+    private boolean     weights_loaded;
 
-    public Gen_Agent(Game game) {
+    public Gen_Agent(Game game)
+    {
         this.game = game;
         //this.weights = new double[]{-0.51,0.76,-0.3566,-0.18448}; //internet weights
-        this.weights = new double[]{-3.459111196332234, 8.798745927744655, -17.509339945947517, -4.244590461223442}; //best trained so far!
+        //this.weights = new double[]{-3.459111196332234, 8.798745927744655, -17.509339945947517, -4.244590461223442}; //best trained so far!
+        this.weights = new double[game.numFeatures()]; //only to initialize
+        this.weights_loaded = false;
     }
 
+    /*public Gen_Agent(Game game, final String encoder_load_file)
+    {
+        // Define game.
+        this.game = game;
+        // Start auto encoder.
+        System.out.println("\nGenAgent: Loading auto encoder");
+        this.game.encoder.buildNetwork(game.numStates());
+        this.game.encoder.load("resources/encoder/"+encoder_load_file);
+        // Initialise genetic weights.
+        this.weights = new double[game.numFeatures()]; //only to initialize
+        this.weights_loaded = false;
+    }
+
+    public Gen_Agent(Game game, final String encoder_save_file, final int num_samples)
+    {
+        // Define game.
+        this.game = game;
+        // Start auto encoder.
+        System.out.println("\nGenAgent: Adapting auto encoder");
+        this.game.encoder.buildNetwork(game.numStates());
+        this.game.encoder.adapt(game.trainingStates(num_samples));
+        this.game.encoder.store("resources/encoder/"+encoder_save_file);
+        // Initialise genetic weights.
+        this.weights = new double[game.numFeatures()]; //only to initialize
+        this.weights_loaded = false;
+    }*/
+
     public int perform() {
+        if(!this.weights_loaded){throw new java.lang.Error("weights not loaded!");}
         //just the function which really does the performance!
         //have a feature weight vector!
         //init reward!
@@ -40,13 +72,17 @@ public class Gen_Agent {
         while (! results.terminated) {
             double[] score = new double[all_actions]; //to eval the moves
             //the higher positive!! the score the better so preinit with -10000 so that no illegal moves taken
-            Arrays.fill(score, -100000.0);
+            Arrays.fill(score, Double.NEGATIVE_INFINITY);
+            //Arrays.fill(score, Double.POSITIVE_INFINITY);
         //STEP3: if valid action - play perform the actions virtually and compute the features
             for (int move=0; move<all_actions; move++){
                 if (game.checkAction(move)){
+                    //calculate the features on the initial board configuration:
+                    //TODO: here calculate the features on the Ausgangslage!!
                     Results outcome = game.virtual_move(game.state(),move);
                     if (outcome.terminated!=true){ //this means game is not over in this drive!
                         //calculate all features!!!
+                        //TODO: replace this function by operator overloading to calculate differential features!!!
                         double[] features = game.features(outcome);
                         double score_ = 0;
                         //calculate the score
@@ -60,11 +96,19 @@ public class Gen_Agent {
             }
 
         //Step5: choose best move
-            double best_score=score[0];
-            int best_move=0;
+            double best_score = score[0];
+            int best_move = 0;
             //find first valid move
             for(int i=0;i<all_actions;i++){
                 if (game.checkAction(i)){
+                    best_score = score[i];
+                    best_move = i;
+                    break;
+                }
+            }
+
+            for(int i=(best_move+1);i<all_actions;i++){
+                if ((score[i]>best_score)&game.checkAction(i)){
                     best_score = score[i];
                     best_move = i;
                     break;
@@ -80,14 +124,17 @@ public class Gen_Agent {
         //Step6: execute this best move
             results = game.step(best_move);
         //Step7: save reward such that You know how succesfull these weights were!!
+            //TETRIS: NUMBER CLEARED ROWS!
+            //CTB: -1* absolute distance between ball and board -> if we search for maximum we find the best!!!
             total_reward = results.reward;
         }
-        //System.out.println("You have completed "+total_reward+" rows.");
+        System.out.println("You have completed "+total_reward+" rows.");
         game = game.restart();
         return (int)total_reward;
     }
 
     public double[] do_genetic_learning(){
+        System.out.println("Simple agent performance was launched...");
         //STEP1: make a first random population
         //general assumption: feature 0,2,3 must be penalized
         //feature 1 must be pushed -> positive
@@ -95,14 +142,21 @@ public class Gen_Agent {
         int size_init_population = 50; //was 500
         int num_repetitions = 10;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
-        double[]weights_lowerbound = new double[]{-40,0,-40,-40};
-        double[]weights_upperbound = new double[]{0,40,0,0};
+        double[]weights_lowerbound = new double[game.numFeatures()];
+        Arrays.fill(weights_lowerbound, -100000.0);
+        double[]weights_upperbound = new double[game.numFeatures()];
+        Arrays.fill(weights_upperbound, 100000.0);
+        //manual cheating:
+        Arrays.fill(weights_upperbound, 0.0);
+        weights_lowerbound[3]=0;
+        weights_upperbound[3]=100000;
 
         //generate initial population
         for (int i=0;i<size_init_population;i++){
             for (int j = 0; j<game.numFeatures(); j++){
                 //TODO: instead of always starting from a completely random population, add some good individuals from the beginning
                 init_population[i][j]= getRandom(weights_lowerbound[j],weights_upperbound[j]);
+                this.weights_loaded = true;
             }
         }
         System.out.println("Initial population generated....");
@@ -156,13 +210,15 @@ public class Gen_Agent {
         System.out.println("You have completed "+init_population[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
         System.out.println(Arrays.toString(init_population[0]));
-    return new double[]{1};
 
+        this.weights_loaded = true;
+
+        return new double[]{1};
     }
 
 
     public void adapt(final int iterations) {
-        // Initialise learning rates as decreasing with time
+        // Initialise qlearning rates as decreasing with time
         // for better adaption.
     }
 
@@ -180,10 +236,15 @@ public class Gen_Agent {
 
                 // To sort in descending order revert
                 // the '>' Operator
-                if (entry1[col] > entry2[col])
+                if (entry1[col] == entry2[col]){
+                    return 0;
+                }
+                else if (entry1[col] > entry2[col]) {
                     return -1;
-                else
+                }
+                else {
                     return 1;
+                }
             }
         });  // End of function call sort().
     }
@@ -296,7 +357,6 @@ public class Gen_Agent {
         eval_population = evalPopulation(input_population, num_repetitions); // for the parent population
         double worst_performer_score = eval_population[eval_population.length-1][game.numFeatures()];
 
-
         //take the best 30% of the old generation (init generation)
         for (int i = 0 ; i < bestOfOld ; i++) {
             for (int j = 0; j < num_features; j++) {
@@ -403,6 +463,7 @@ public class Gen_Agent {
             fw.write("Size of population: " + size_init_population);
             fw.write("\n");
             fw.write("Heuristic " + heuristic);
+            fw.write(Integer.toString(game.numFeatures()));
             fw.write("\n");
             for (double[] action_rewards : matrix) {
                 for (double reward : action_rewards) {
@@ -415,8 +476,59 @@ public class Gen_Agent {
         System.out.println("Stored Best Results in " + filename);
     }
 
+    public void loadMatrix(final String filename)
+    {
+        int num_features_txt = 0;
+        //System.out.println("resources/genetic/"+filename);
+        try
+        {
+            final BufferedReader in = new BufferedReader(new FileReader("resources/genetic/"+filename));
+            String line;
+            int desired_weights = 2;
+            int offset = 1; //there stand the number of weights!!!
+            int i = 0;
+            int a = 0;
+            //System.out.println(game.numFeatures());
+            while ((line = in.readLine()) != null)
+            {
+                //System.out.print(line);
+                //System.out.print("\n");
+                //System.out.print(i);
+                if (i==offset){
+                    final String[] values = line.split(",");
+                    for (String str : values)
+                    {
+                        num_features_txt = Integer.parseInt(str);
+                        //Stop if number of features do not coincide
+                        if(num_features_txt!=game.numFeatures()){throw new java.lang.Error("number of features are different!");}
+                    }
+                }
+
+
+                if (i==desired_weights){
+                    final String[] values = line.split(",");
+                    for (String str : values)
+                    {
+                        if (a<game.numFeatures()){
+                            this.weights[a] = Double.parseDouble(str);
+                            a++;
+                        }
+                        if (a>=(game.numFeatures()-1)){this.weights_loaded=true;}
+
+                    }
+                }
+                i++;
+            }
+
+        } catch (IOException e) { e.printStackTrace(); }
+        System.out.println("Loaded Desired weights in " + filename);
+        System.out.println(Arrays.toString(this.weights));
+    }
+
     public String getCurrentTimeStamp() {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
     }
+
+    public Game getGame() {return game; }
 
 }
