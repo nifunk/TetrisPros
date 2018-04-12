@@ -12,12 +12,15 @@ import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import game.TetrisInterface;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Gen_Agent {
 
     private Game        game;
     private double[]    weights;
     private boolean     weights_loaded;
+    private int[]       perf_scores;
 
     public Gen_Agent(Game game)
     {
@@ -26,6 +29,12 @@ public class Gen_Agent {
         //this.weights = new double[]{-3.459111196332234, 8.798745927744655, -17.509339945947517, -4.244590461223442}; //best trained so far!
         this.weights = new double[game.numFeatures()]; //only to initialize
         this.weights_loaded = false;
+        this.perf_scores = new int[1000]; // globally set everytime a game is played
+        // this.games = games;
+    }
+
+    public double[] get_weights() {
+        return this.weights;
     }
 
     /*public Gen_Agent(Game game, final String encoder_load_file)
@@ -57,15 +66,27 @@ public class Gen_Agent {
 
     public class Performer implements Runnable {
 
-        private int retVal;
-
-        public int getVal() {
-            return this.retVal;
+        private int retVal; // NOT NEEDED
+        private int whichGame;
+        private Game game;
+        private double[]    weights;
+        private boolean     weights_loaded;
+        
+        public Performer(double[] wts) {
+            // Gen_Agent ga = new Gen_Agent(game);
+            this.game = new TetrisInterface();
+            this.weights = wts;
+            this.weights_loaded = true;
+    
+        }
+        
+        public void setGame(int gameNum) {
+            this.whichGame = gameNum;
         }
 
         // public int perform() {
         public void run() {
-            if(!Gen_Agent.this.weights_loaded){throw new java.lang.Error("weights not loaded!");}
+            if(!weights_loaded){throw new java.lang.Error("weights not loaded!");}
             //just the function which really does the performance!
             //have a feature weight vector!
             //init reward!
@@ -74,7 +95,7 @@ public class Gen_Agent {
             int all_actions = game.numActions();
             int num_features = game.numFeatures();
             //feature vector: dim1=action idx; dim2= features to this index
-            double[] weights_ = Gen_Agent.this.weights;
+            double[] weights_ = weights;
             // Important: have to take measure such that we dont choose illegal move!!
 
             //Need this?! - doubt it
@@ -91,7 +112,7 @@ public class Gen_Agent {
                         //calculate the features on the initial board configuration:
                         //TODO: here calculate the features on the Ausgangslage!!
                         Results outcome = game.virtual_move(game.state(),move);
-                        if (outcome.terminated!=true){ //this means game is not over in this drive!
+                        if (outcome.terminated!=true){ //this means games is not over in this drive!
                             //calculate all features!!!
                             //TODO: replace this function by operator overloading to calculate differential features!!!
                             double[] features = game.features(outcome);
@@ -139,10 +160,19 @@ public class Gen_Agent {
                 //CTB: -1* absolute distance between ball and board -> if we search for maximum we find the best!!!
                 total_reward = results.reward;
             }
-            System.out.println("You have completed "+total_reward+" rows.");
-            game = game.restart();
+            // System.out.println("You have completed "+total_reward+" rows.");
             // return (int)total_reward;
-            this.retVal = (int)total_reward;
+            this.retVal = (int)total_reward; // NOT NEEDED
+            Gen_Agent.this.perf_scores[whichGame] = this.retVal;
+            // System.out.println("Setting " + this.retVal + " rows");
+            game = game.restart();
+            
+        }
+
+        // NOT NEEDED
+        public int getVal() {
+            System.out.println("Returning " + this.retVal + " rows");
+            return this.retVal;
         }
     }
 
@@ -283,13 +313,21 @@ public class Gen_Agent {
             //play num_repetition times
             ExecutorService executor = Executors.newFixedThreadPool(num_repetitions);
             double[] store_score = new double[num_repetitions];
+            Performer[] performers = new Performer[num_repetitions];
             for (int j = 0; j < num_repetitions; j++) {
-                Performer performer = new Performer();
-                executor.execute(performer);
-                store_score[j] = performer.getVal();
+                performers[j] = new Performer(this.weights);
+                performers[j].setGame(j);
+                executor.execute(performers[j]);
+                // store_score[j] = performer.getVal();
             }
 
             executor.shutdown();
+            for (int j = 0 ; j < num_repetitions; j++)
+            {
+                // System.out.println("Rows cleared is publicly : " + performers[j].retVal);
+                // store_score[j] = performers[j].getVal();
+                store_score[j] = this.perf_scores[j];
+            }
 
             double score_best = store_score[0];
 
@@ -305,6 +343,7 @@ public class Gen_Agent {
                 score_best = score_best + store_score[j];
             }
             score_best = score_best/num_repetitions;
+            // System.out.println("CHECK store score is : " + this.perf_scores[0]);
 
 
             population[i][game.numFeatures()] = score_best;
@@ -320,16 +359,25 @@ public class Gen_Agent {
             this.weights[j] = child[j];
         }
         
+        // System.out.println(" IN CHILD -------------------------->");
         //play num_repetition times
         ExecutorService executor = Executors.newFixedThreadPool(num_repetitions);
         double[] store_score = new double[num_repetitions];
+        Performer[] performers = new Performer[num_repetitions];
         for (int j = 0; j < num_repetitions; j++) {
-            Performer performer = new Performer();
-            executor.execute(performer);
-            store_score[j] = performer.getVal();
+            performers[j] = new Performer(this.weights);
+            performers[j].setGame(j);
+            executor.execute(performers[j]);
+            // store_score[j] = performer.getVal();
+            // System.out.println("Store score is : " + store_score[j]);
         }
 
         executor.shutdown();
+        for (int j = 0 ; j < num_repetitions; j++)
+        {
+            // store_score[j] = performers[j].getVal();
+            store_score[j] = this.perf_scores[j];
+        }
 
         double score_best = store_score[0];
 
@@ -346,6 +394,7 @@ public class Gen_Agent {
         }
         score_best = score_best/num_repetitions;
 
+        // System.out.println(" <-------------------------- EXITING CHILD ");
 
         child[game.numFeatures()] = score_best;
     	return child;

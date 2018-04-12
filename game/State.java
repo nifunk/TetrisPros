@@ -186,7 +186,14 @@ public class State {
 		int height = top[slot]-pBottom[nextPiece][orient][0];
 		//for each column beyond the first in the piece
 		for(int c = 1; c < pWidth[nextPiece][orient];c++) {
-			height = Math.max(height,top[slot+c]-pBottom[nextPiece][orient][c]);
+			try {
+				height = Math.max(height,top[slot+c]-pBottom[nextPiece][orient][c]);	
+			}
+			catch (Exception e) {
+				System.out.println("orient : " + orient + " , orient;len : " + pBottom[nextPiece].length);
+			}
+			
+
 		}
 		
 		//check if game ended

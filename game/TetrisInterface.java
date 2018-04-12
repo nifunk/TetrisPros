@@ -212,7 +212,13 @@ public class TetrisInterface extends Game
 
 
         //height if the first column makes contact
-        int height = top[slot]-pBottom[nextPiece][orient][0];
+        int height = 0;
+        try {
+            height = top[slot]-pBottom[nextPiece][orient][0];
+        }
+        catch (Exception e) {
+            System.out.println("slot : " + slot + " , nextPiece : " + nextPiece + " , orientation : " + orient + " orient.length : " + pBottom[nextPiece].length);
+        }
         //for each column beyond the first in the piece
         for(int c = 1; c < pWidth[nextPiece][orient];c++)
         {

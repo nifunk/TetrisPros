@@ -30,7 +30,12 @@ public class Player {
     	//agent.perform();
 
 		//For Genetic algorithm: -> HAND CRAFTED FEATURES:
-		Gen_Agent agent = new Gen_Agent(new TetrisInterface());
+		// TetrisInterface [] ti = new TetrisInterface[1000];
+		// for (int i=0; i < ti.length; i++) {
+		// 	ti[i] = new TetrisInterface();
+		// }
+		TetrisInterface ti = new TetrisInterface();
+		Gen_Agent agent = new Gen_Agent(ti);
 		boolean want_to_train = true;
 
 		if(!want_to_train){
@@ -41,9 +46,10 @@ public class Player {
 			//BEST OWN TRAINED:
 			agent.loadMatrix("11_feat_ourbest_1.txt");
 			////let the player act
+			double[] wts = agent.get_weights();
 			System.out.println("Simple agent performance was launched...");
 			////agent.getGame().activateVisualisation();
-			Gen_Agent.Performer performer = agent.new Performer();
+			Gen_Agent.Performer performer = agent.new Performer(wts);
             performer.run();
             performer.getVal();
             // agent.perform();
