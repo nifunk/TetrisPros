@@ -79,7 +79,7 @@ public class Gen_Agent {
             this.weights_loaded = true;
     
         }
-        
+
         public void setGame(int gameNum) {
             this.whichGame = gameNum;
         }
@@ -239,6 +239,16 @@ public class Gen_Agent {
             
             init_population = doCrossingandMutation(init_population, num_repetitions, fraction, child_heuristic, prop_mutation, fraction_direct_pass);
             System.out.println( (i+1) + " Selected population created....");
+            
+            int minLenght = Math.min(10, init_population.length);
+            sortbyColumn(init_population,game.numFeatures());
+            double[][] bestTen = new double[minLenght][game.numFeatures()+1];
+            for (int j = 0; j < minLenght; j++) {
+                System.arraycopy(init_population[j], 0, bestTen[j], 0, bestTen[j].length);
+            }
+            String dataString = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
+            String fileName = size_init_population + "_" + numGenerations + "_" + child_heuristic + "_iteration_" + (i+1) + "_" + dataString;
+            storeMatrix("resources/genetic/iterations/" + fileName, bestTen, numGenerations, size_init_population, child_heuristic);
         }
        
 
