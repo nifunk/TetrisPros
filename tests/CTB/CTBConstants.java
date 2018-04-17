@@ -1,4 +1,4 @@
-package tests;
+package tests.CTB;
 
 public class CTBConstants
 {

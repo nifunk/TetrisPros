@@ -1,4 +1,4 @@
-package tests;
+package tests.CTB;
 
 import game.Game;
 import game.Results;

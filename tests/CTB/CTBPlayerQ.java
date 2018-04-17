@@ -1,4 +1,4 @@
-package tests;
+package tests.CTB;
 
 import qlearning.QAgent;
 
