@@ -24,7 +24,7 @@ public class ConvolutionalEncoder extends Encoder
     private final int ENCODER_LAYER     = 1;
     private final double LEARNING_RATE  = 1e-9; //was 10e-6 for CTB
     private final int BATCH_SIZE        = 2; //was 100 for CTB
-    private final double TERMINAL_ERROR = 3.5; //was 0.025 CTB
+    private final double TERMINAL_ERROR = 8.5; //was 0.025 CTB
 
     @Override
     public void build(final int encoder_size, final int input_size)
@@ -93,7 +93,7 @@ public class ConvolutionalEncoder extends Encoder
                     _network.reset();
                 }
                 fw.write(train.getError() + ", ");
-            } while (Math.abs(train.getError()) > TERMINAL_ERROR);
+            } while ((Math.abs(train.getError()) > TERMINAL_ERROR) && epoch < 200);
             train.finishTraining();
             // Fine tuning using back propagation algorithm.
             Backpropagation train_ = new Backpropagation(_network, training_data);
@@ -105,8 +105,8 @@ public class ConvolutionalEncoder extends Encoder
                 System.out.printf("Epoch #%d, Error = %f, Grad = %f\n",
                                   epoch, train_.getError(), Math.abs(train_.getError() - last_error));
                 epoch++;
-                fw.write(train.getError() + ", ");
-            } while (Math.abs(train_.getError() - last_error) > 10e-4);
+                fw.write(train_.getError() + ", ");
+            } while (Math.abs(train_.getError() - last_error) > 10e-3);
             train_.finishTraining();
             fw.close();
         } catch (IOException e) { e.printStackTrace(); }
