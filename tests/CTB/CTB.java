@@ -35,18 +35,7 @@ public class CTB extends Game
         //MAKE THE ACTION
         state.update(actions()[0][action]);
         if (visualise_game) panel.repaint();
-        //CALCULATE THE REWARD:
-        int[] firstHalf = Arrays.copyOfRange(this.state(), 0, this.numStates()/2);
-        int[] secondHalf = Arrays.copyOfRange(this.state(), this.numStates()/2, numStates());
-        int brett_pos = 0;
-        int ball_pos = 0;
-        for (int i=0; i<(numStates()/2);i++){
-            if (firstHalf[i]!=0){brett_pos=i;}
-            if (secondHalf[i]!=0){ball_pos=i;}
-        }
-        //Reward is negative distance such that we can later search for maximum!
-        int distance = -abs(brett_pos-ball_pos);
-        return new Results(distance, state(), terminal());
+        return new Results(reward(), state(), terminal());
     }
 
     @Override
@@ -73,15 +62,12 @@ public class CTB extends Game
     {
         CTB new_game = new CTB();
         if (visualise_game)
-    {
-        frame.setVisible(false);
-        frame.dispose();
-        new_game.activateVisualisation();
-    }
-        if (encoder.encoderReady())
-    {
+        {
+            frame.setVisible(false);
+            frame.dispose();
+            new_game.activateVisualisation();
+        }
         new_game.encoder = encoder;
-    }
         return new_game;
 }
 
@@ -89,7 +75,7 @@ public class CTB extends Game
     public int[][] actions()
     {
         int[][] actions = new int[1][];
-        actions[0]    = new int[]{-CTBConstants.catcher_speed, 0, +CTBConstants.catcher_speed};
+        actions[0]      = new int[]{-CTBConstants.catcher_speed, 0, +CTBConstants.catcher_speed};
         return actions;
     }
 
@@ -128,33 +114,13 @@ public class CTB extends Game
     @Override
     public double[] features(Results virtual_state_res)
     {
-        if(encoder.encoderReady())
-        {
-            double[] state_double = new double[virtual_state_res.state.length];
-            for(int i = 0; i < virtual_state_res.state.length; i++)
-                state_double[i] = virtual_state_res.state[i];
-            return encoder.encoding(state_double);
-        }
-        else
-        {
-            int[] firstHalf = Arrays.copyOfRange(virtual_state_res.state, 0, numStates()/2);
-            int[] secondHalf = Arrays.copyOfRange(virtual_state_res.state, numStates()/2, numStates());
-            int brett_pos = 0;
-            int ball_pos = 0;
-            for (int i=0; i<(numStates()/2);i++){
-                if (firstHalf[i]!=0){brett_pos=i;}
-                if (secondHalf[i]!=0){ball_pos=i;}
-            }
-            int distance = abs(brett_pos-ball_pos);
-
-            return new double[]{distance};
-        }
+        return encoder.encoding(virtual_state_res.state);
     }
 
     @Override
     public int numFeatures()
     {
-        return encoder.encoderReady() ? encoder.getEncoderSize() : 1;
+        return encoder.encoderSize();
     }
 
     private class Panel extends JPanel

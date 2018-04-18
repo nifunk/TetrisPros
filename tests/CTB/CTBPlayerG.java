@@ -11,8 +11,9 @@ public class CTBPlayerG {
 
     private CTBPlayerG()
     {
-        // Train auto encoder.
-        Gen_Agent agent = new Gen_Agent(new CTB(), "test.eg", 200000);
+        // Init encoder and agent.
+        ManuelFeaturesCTB encoder = new ManuelFeaturesCTB();
+        Gen_Agent agent = new Gen_Agent(new CTB(), encoder);
         // Let the player learn.
         agent.do_genetic_learning();
         // Let the player act.

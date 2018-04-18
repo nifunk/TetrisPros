@@ -11,11 +11,12 @@ public class CTBPlayerQ {
 
     private CTBPlayerQ()
     {
-        QAgent agent = new QAgent(new CTB());
+        // Init encoder and agent.
+        ManuelFeaturesCTB encoder = new ManuelFeaturesCTB();
+        QAgent agent = new QAgent(new CTB(), encoder);
         // Train encoder and agent.
         agent.adapt();
-        agent.store("resources/q_matrix/ctb.txt",
-                    "resources/encoder/ctb.eg");
+        agent.store("resources/qlearning/ctb.txt");
         // Perform as demonstration of results.
         agent.getGame().activateVisualisation();
         agent.perform();

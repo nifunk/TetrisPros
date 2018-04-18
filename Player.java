@@ -1,3 +1,4 @@
+import game.ManuelFeatures;
 import game.TetrisInterface;
 import genetic.Gen_Agent;
 
@@ -8,16 +9,10 @@ public class Player {
 	}
 
 	private Player() {
-    	////For Q-qlearning:
-		//QAgent agent = new QAgent(new TetrisInterface());
-		//// Train encoder and agent.
-        //agent.adapt();
-		//// Perform as demonstration of results.
-        ////agent.getGame().activateVisualisation();
-    	//agent.perform();
 
 		//For Genetic algorithm: -> HAND CRAFTED FEATURES:
-		Gen_Agent agent = new Gen_Agent(new TetrisInterface());
+        ManuelFeatures encoder = new ManuelFeatures();
+		Gen_Agent agent = new Gen_Agent(new TetrisInterface(), encoder);
 		boolean want_to_train = false;
 
 		if(!want_to_train){
@@ -39,18 +34,6 @@ public class Player {
 			agent.do_genetic_learning();
 		}
 
-		// TRAIN AUTO ENCODER
-		//Gen_Agent agent = new Gen_Agent(new TetrisInterface(), "test_tetris.eg", 200000);
-		// DO NOT TRAIN AUTOENCODER
-		//Gen_Agent agent = new Gen_Agent(new TetrisInterface(), "test_tetris.eg");
-		// Let the player learn.
-		//agent.do_genetic_learning();
-		// Let the player act.
-		//agent.loadMatrix("ctb_enc.txt");
-		//agent.getGame().activateVisualisation();
-		//agent.perform();
-
-    
 		System.exit(0);
 	}
 	

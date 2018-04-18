@@ -1,5 +1,6 @@
 package genetic;
 
+import autoencoder.Encoder;
 import game.Game;
 import game.Results;
 
@@ -17,38 +18,11 @@ public class Gen_Agent {
     private double[]    weights;
     private boolean     weights_loaded;
 
-    public Gen_Agent(Game game)
+    public Gen_Agent(Game game, final Encoder encoder)
     {
         this.game = game;
-        //this.weights = new double[]{-0.51,0.76,-0.3566,-0.18448}; //internet weights
+        this.game.encoder = encoder;
         //this.weights = new double[]{-3.459111196332234, 8.798745927744655, -17.509339945947517, -4.244590461223442}; //best trained so far!
-        this.weights = new double[game.numFeatures()]; //only to initialize
-        this.weights_loaded = false;
-    }
-
-    public Gen_Agent(Game game, final String encoder_load_file)
-    {
-        // Define game.
-        this.game = game;
-        // Start auto encoder.
-        System.out.println("\nGenAgent: Loading auto encoder");
-        this.game.encoder.buildNetwork(game.numStates());
-        this.game.encoder.load("resources/encoder/"+encoder_load_file);
-        // Initialise genetic weights.
-        this.weights = new double[game.numFeatures()]; //only to initialize
-        this.weights_loaded = false;
-    }
-
-    public Gen_Agent(Game game, final String encoder_save_file, final int num_samples)
-    {
-        // Define game.
-        this.game = game;
-        // Start auto encoder.
-        System.out.println("\nGenAgent: Adapting auto encoder");
-        this.game.encoder.buildNetwork(game.numStates());
-        this.game.encoder.adapt(game.trainingStates(num_samples));
-        this.game.encoder.store("resources/encoder/"+encoder_save_file);
-        // Initialise genetic weights.
         this.weights = new double[game.numFeatures()]; //only to initialize
         this.weights_loaded = false;
     }

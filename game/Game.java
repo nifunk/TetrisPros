@@ -1,10 +1,9 @@
 package game;
 
-import autoencoder.StateEncoder;
+import autoencoder.Encoder;
 
-public abstract class Game {
-
-    public StateEncoder encoder = new StateEncoder();
+public abstract class Game
+{
 
     // Results of a (random) initial game state.
     abstract public Results initial();
@@ -44,5 +43,8 @@ public abstract class Game {
   
     // Activate visualisation (as initially deactivated).
     abstract public void activateVisualisation();
+
+    // Auto encoder.
+    public Encoder encoder;
 
 }
