@@ -1,3 +1,6 @@
+import autoencoder.ConvolutionalEncoder;
+import autoencoder.Encoder;
+import game.Game;
 import game.ManuelFeatures;
 import game.TetrisInterface;
 import genetic.Gen_Agent;
@@ -10,8 +13,12 @@ public class Player {
 
 	private Player() {
 
-		//For Genetic algorithm: -> HAND CRAFTED FEATURES:
-        ManuelFeatures encoder = new ManuelFeatures();
+        Game tetris     = new TetrisInterface();
+        Encoder encoder = new ConvolutionalEncoder();
+        encoder.build(20,
+                      tetris.numStates(),
+                      tetris.trainingStates(10000),
+                      "resources/encoder/tetris.txt");
 		Gen_Agent agent = new Gen_Agent(new TetrisInterface(), encoder);
 		boolean want_to_train = false;
 

@@ -13,6 +13,8 @@ import org.encog.neural.networks.training.propagation.sgd.StochasticGradientDesc
 import org.encog.persist.EncogDirectoryPersistence;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class ConvolutionalEncoder extends Encoder
 {
@@ -22,7 +24,7 @@ public class ConvolutionalEncoder extends Encoder
     private final int ENCODER_LAYER     = 1;
     private final double LEARNING_RATE  = 1e-9; //was 10e-6 for CTB
     private final int BATCH_SIZE        = 2; //was 100 for CTB
-    private final double TERMINAL_ERROR = 1.5; //was 0.025 CTB
+    private final double TERMINAL_ERROR = 3.5; //was 0.025 CTB
 
     @Override
     public void build(final int encoder_size, final int input_size)
@@ -71,37 +73,43 @@ public class ConvolutionalEncoder extends Encoder
         }
         // Build training data set.
         final MLDataSet training_data = new BasicMLDataSet(training_inputs, training_inputs);
-        // Train network (inputs = label as encoder).
-        int epoch = 1; double last_error;
-        StochasticGradientDescent train = new StochasticGradientDescent(_network, training_data);
-        train.setLearningRate(LEARNING_RATE);
-        train.setBatchSize(BATCH_SIZE);
-        do {
-            last_error = train.getError();
-            train.iteration();
-            System.out.printf("Epoch #%d, Error = %f, Grad = %f\n",
-                              epoch, train.getError(), Math.abs(train.getError() - last_error));
-            epoch++;
-            if(epoch>5000){
-                epoch = 0;
-                _network.reset();
-            }
-        } while (Math.abs(train.getError()) > TERMINAL_ERROR);
-        train.finishTraining();
-
-
-        Backpropagation train_ = new Backpropagation(_network, training_data);
-        //train_.setLearningRate(LEARNING_RATE);
-        train_.setBatchSize(BATCH_SIZE);
-        do {
-            last_error = train_.getError();
-            train_.iteration();
-            System.out.printf("Epoch #%d, Error = %f, Grad = %f\n",
-                              epoch, train_.getError(), Math.abs(train_.getError() - last_error));
-            epoch++;
-        } while (Math.abs(train_.getError() - last_error) > 10e-4);
-        train_.finishTraining();
-
+        // Init training log file.
+        try {
+            final FileWriter fw = new FileWriter("resources/training/conv.txt");
+            // Pre training using Stochastic gradient descent (to get into lowest local minimum).
+            int epoch = 1; double last_error;
+            StochasticGradientDescent train = new StochasticGradientDescent(_network, training_data);
+            train.setLearningRate(LEARNING_RATE);
+            train.setBatchSize(BATCH_SIZE);
+            do {
+                last_error = train.getError();
+                train.iteration();
+                System.out.printf("Epoch #%d, Error = %f, Grad = %f\n",
+                                  epoch, train.getError(), Math.abs(train.getError() - last_error));
+                epoch++;
+                if(epoch>5000)
+                {
+                    epoch = 0;
+                    _network.reset();
+                }
+                fw.write(train.getError() + ", ");
+            } while (Math.abs(train.getError()) > TERMINAL_ERROR);
+            train.finishTraining();
+            // Fine tuning using back propagation algorithm.
+            Backpropagation train_ = new Backpropagation(_network, training_data);
+            train_.setLearningRate(LEARNING_RATE);
+            train_.setBatchSize(BATCH_SIZE);
+            do {
+                last_error = train_.getError();
+                train_.iteration();
+                System.out.printf("Epoch #%d, Error = %f, Grad = %f\n",
+                                  epoch, train_.getError(), Math.abs(train_.getError() - last_error));
+                epoch++;
+                fw.write(train.getError() + ", ");
+            } while (Math.abs(train_.getError() - last_error) > 10e-4);
+            train_.finishTraining();
+            fw.close();
+        } catch (IOException e) { e.printStackTrace(); }
 
     }
 

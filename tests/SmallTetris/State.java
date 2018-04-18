@@ -39,17 +39,17 @@ public class State {
 	//the next several arrays define the piece vocabulary in detail
 	//width of the pieces [piece ID][orientation]
 	protected static int[][] pWidth = {
-            {1}
+			{1}
 	};
 	//height of the pieces [piece ID][orientation]
 	private static int[][] pHeight = {
-			{1}
+            {2}
 	};
 	private static int[][][] pBottom = {
             {{0}}
 	};
 	private static int[][][] pTop = {
-            {{1}}
+            {{2}}
 	};
 	
 	//initialize legalMoves

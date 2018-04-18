@@ -1,6 +1,7 @@
 package tests.SmallTetris;
 
 import autoencoder.BinaryFlattening;
+import autoencoder.Encoder;
 import qlearning.QAgent;
 
 public class TetrisSmallPlayer
@@ -14,11 +15,13 @@ public class TetrisSmallPlayer
     private TetrisSmallPlayer()
     {
         // Init encoder and agent.
-        BinaryFlattening encoder = new BinaryFlattening();
+        Encoder encoder = new BinaryFlattening();
+        encoder.build(1, -1);
         QAgent agent = new QAgent(new TetrisInterfaceSmall(), encoder);
         // Train encoder and agent.
         agent.adapt();
         agent.store("resources/qlearning/tetris_small.txt");
+        //agent.load("resources/qlearning/tetris_small.txt");
         // Perform as demonstration of results.
         agent.getGame().activateVisualisation();
         agent.perform();

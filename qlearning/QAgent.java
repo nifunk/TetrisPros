@@ -12,7 +12,7 @@ public class QAgent
     private Game _game;
     private QLearning _qkb;
 
-    private final int Q_TRAINING_ITERATIONS = 1000000;
+    private final int Q_TRAINING_ITERATIONS = 100000;
 
     public QAgent(Game game, final Encoder encoder)
     {

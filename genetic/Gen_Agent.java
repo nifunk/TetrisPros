@@ -114,8 +114,8 @@ public class Gen_Agent {
         Arrays.fill(weights_upperbound, 100000.0);
         //manual cheating:
         Arrays.fill(weights_upperbound, 0.0);
-        weights_lowerbound[3]=0;
-        weights_upperbound[3]=100000;
+        //weights_lowerbound[3]=0;
+        //weights_upperbound[3]=100000;
 
         //generate initial population
         for (int i=0;i<size_init_population;i++){

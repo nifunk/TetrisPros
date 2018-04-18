@@ -84,7 +84,7 @@ public class NeuralEncoder extends Encoder
 
 
         Backpropagation train_ = new Backpropagation(_network, training_data);
-        //train_.setLearningRate(LEARNING_RATE);
+        train_.setLearningRate(LEARNING_RATE);
         train_.setBatchSize(BATCH_SIZE);
         do {
             last_error = train_.getError();
