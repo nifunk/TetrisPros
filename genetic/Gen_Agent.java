@@ -14,13 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import game.TetrisInterface;
 import java.util.concurrent.atomic.AtomicInteger;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 import java.util.concurrent.TimeUnit;
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 public class Gen_Agent {
 
@@ -86,11 +80,8 @@ public class Gen_Agent {
             this.weights_loaded = true;
     
         }
-<<<<<<< Updated upstream
 
-=======
-        
->>>>>>> Stashed changes
+       
         public void setGame(int gameNum) {
             this.whichGame = gameNum;
         }

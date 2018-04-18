@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -l select=1:ncpus=10:mpiprocs=10
+#PBS -l walltime=120:00:00
+#numruns=$1
+gen=(1000)
+psize=300
+heur=0
+frac=0.25
+probmut=0.05
+fracpas=0.3
+cd /home/users/nus/e0269734/TetrisPros
+module load java
+javac Player.java
+for i in {0..0}
+do
+        java Player ${gen[$i]} $psize $heur $frac $probmut $fracpas
+done
+cd /recources/genetic
