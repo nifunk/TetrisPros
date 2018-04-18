@@ -14,7 +14,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import game.TetrisInterface;
 import java.util.concurrent.atomic.AtomicInteger;
+<<<<<<< Updated upstream
 import java.util.concurrent.TimeUnit;
+=======
+>>>>>>> Stashed changes
 
 public class Gen_Agent {
 
@@ -359,6 +362,7 @@ public class Gen_Agent {
             }
             score_best = score_best/num_repetitions;
             // System.out.println("CHECK store score is : " + this.perf_scores[0]);
+            // System.out.println("CHECK store score is : " + this.perf_scores[0]);
 
 
             population[i][game.numFeatures()] = score_best;
@@ -374,7 +378,11 @@ public class Gen_Agent {
             this.weights[j] = child[j];
         }
         
+<<<<<<< Updated upstream
         // System.out.println(" IN CHILD -------------------------->");
+=======
+        System.out.println(" IN CHILD -------------------------->");
+>>>>>>> Stashed changes
         //play num_repetition times
         ExecutorService executor = Executors.newFixedThreadPool(num_repetitions);
         double[] store_score = new double[num_repetitions];
@@ -388,7 +396,10 @@ public class Gen_Agent {
         }
 
         executor.shutdown();
+<<<<<<< Updated upstream
         executor.awaitTermination(1000, TimeUnit.MINUTES);
+=======
+>>>>>>> Stashed changes
         for (int j = 0 ; j < num_repetitions; j++)
         {
             // store_score[j] = performers[j].getVal();
@@ -410,7 +421,11 @@ public class Gen_Agent {
         }
         score_best = score_best/num_repetitions;
 
+<<<<<<< Updated upstream
         // System.out.println(" <-------------------------- EXITING CHILD ");
+=======
+        System.out.println(" <-------------------------- EXITING CHILD ");
+>>>>>>> Stashed changes
 
         child[game.numFeatures()] = score_best;
     	return child;
