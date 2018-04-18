@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import game.TetrisInterface;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.TimeUnit;
 
 public class Gen_Agent {
 
@@ -205,8 +206,15 @@ public class Gen_Agent {
         }
         System.out.println("Initial population generated....");
         //play with all the 1000 combinations and store the highest
-        init_population = evalPopulation(init_population,num_repetitions);
+        try {
+        	init_population = evalPopulation(init_population,num_repetitions);
+        }
+        catch (InterruptedException e)
+        {
+        	System.out.println("Caught interrupted exception");
+        }
 
+        
         System.out.println("Initial population succesfully evaluated");
 
         //STEP2: choose the best ones -> selection
@@ -236,7 +244,6 @@ public class Gen_Agent {
              //TODO: train over multiple generations 
             //STEP3: crossover and mutation
             //double[][] selected_population = doCrossingandMutation(init_population,tokeep,size_new_pop,prop_mutation,weights_lowerbound,weights_upperbound);
-            
             init_population = doCrossingandMutation(init_population, num_repetitions, fraction, child_heuristic, prop_mutation, fraction_direct_pass);
             System.out.println( (i+1) + " Selected population created....");
         }
@@ -246,13 +253,20 @@ public class Gen_Agent {
         //Fuse selected_population and init_population to get the really best!!
         //int entries = 10; //store the 10 best overall!!!
         //double [][]final_result = fuseMatrix(init_population,selected_population,entries);
-        init_population = evalPopulation(init_population, num_repetitions);
+        try {
+            init_population = evalPopulation(init_population, num_repetitions);
+        }
+        catch (InterruptedException e)
+        {
+        	System.out.println("Caught interrupted exception");
+        }
+            
 
         String dataString = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
         String fileName = size_init_population + "_" + numGenerations + "_" + child_heuristic + "_" + dataString;
         storeMatrix("resources/genetic/" + fileName, init_population, numGenerations, size_init_population, child_heuristic);
 
-        System.out.println("You have completed "+init_population[0][game.numFeatures()]+" rows.");
+        // System.out.println("Executor : You have completed "+init_population[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
         System.out.println(Arrays.toString(init_population[0]));
 
@@ -303,7 +317,7 @@ public class Gen_Agent {
 
     //given a population, execute the game with it and store the results in the resulting array!
     //return: in descending order sorted array!
-    private double[][] evalPopulation(double[][] population, int num_repetitions){
+    private double[][] evalPopulation(double[][] population, int num_repetitions) throws InterruptedException {
         int size_population = population.length;
         for (int i=0;i<size_population;i++) {
             //set weights in this iteration
@@ -322,6 +336,7 @@ public class Gen_Agent {
             }
 
             executor.shutdown();
+            executor.awaitTermination(1000, TimeUnit.MINUTES);
             for (int j = 0 ; j < num_repetitions; j++)
             {
                 // System.out.println("Rows cleared is publicly : " + performers[j].retVal);
@@ -353,7 +368,7 @@ public class Gen_Agent {
         return population;
     }
 
-    private double[] evalChild(double[] child, int num_repetitions){
+    private double[] evalChild(double[] child, int num_repetitions) throws InterruptedException {
             //set weights in this iteration
         for (int j = 0; j < game.numFeatures(); j++) {
             this.weights[j] = child[j];
@@ -373,6 +388,7 @@ public class Gen_Agent {
         }
 
         executor.shutdown();
+        executor.awaitTermination(1000, TimeUnit.MINUTES);
         for (int j = 0 ; j < num_repetitions; j++)
         {
             // store_score[j] = performers[j].getVal();
@@ -428,13 +444,21 @@ public class Gen_Agent {
         double[][]eval_population = new double[input_population.length][game.numFeatures()+1];
         int num_features = game.numFeatures();
 
-        eval_population = evalPopulation(input_population, num_repetitions); // for the parent population
+        try {
+        	eval_population = evalPopulation(input_population, num_repetitions); // for the parent population
+        }
+        catch (InterruptedException e)
+        {
+        	System.out.println("caught interrupted exception");
+        }
         double worst_performer_score = eval_population[eval_population.length-1][game.numFeatures()];
 
         //take the best 30% of the old generation (init generation)
         for (int i = 0 ; i < bestOfOld ; i++) {
             for (int j = 0; j < num_features; j++) {
-                new_population[i][j] = eval_population[i][j];
+            	
+            	new_population[i][j] = eval_population[i][j];	
+            	
             }
         }
 
@@ -458,14 +482,28 @@ public class Gen_Agent {
 	                        child[j] = input_population[parent2][j];
 	                    }
 	                }
-	                child = evalChild(child, num_repetitions);
+	                try {
+	                	child = evalChild(child, num_repetitions);	
+	                }
+	                catch (InterruptedException e)
+	                {
+	                	System.out.println("caught interrupted exception");
+	                }
+	                
 	            }
 	            //heuristic 2
 	            else if (child_heuristic == 1) {
 	                for(int j = 0; j < game.numFeatures() + 1; j++){
 	                    child[j] = (input_population[parent1][j] + input_population[parent2][j])/2;
 	                }
-	                child = evalChild(child, num_repetitions);
+	                try {
+	                	child = evalChild(child, num_repetitions);	
+	                }
+	                catch (InterruptedException e)
+	                {
+	                	System.out.println("caught interrupted exception");
+	                }
+	                
 	            }
                 //heuristic 3 - mix n match weights from both parent 1 and parent 2
                 else if(child_heuristic == 2) {
@@ -479,7 +517,14 @@ public class Gen_Agent {
                         }
                     }
                     child[num_features] = (input_population[parent1][num_features] + input_population[parent2][num_features])/2;
-                    child = evalChild(child, num_repetitions);
+                    try {
+                    	child = evalChild(child, num_repetitions);	
+                    }
+                    catch (InterruptedException e)
+	                {
+	                	System.out.println("caught interrupted exception");
+	                }
+                    
                 }
                 //heuristic 4 - set a line
 	            else {
@@ -491,7 +536,14 @@ public class Gen_Agent {
                             child[j] = input_population[parent1][j];
                     }
                     child[num_features] = (input_population[parent1][num_features] + input_population[parent2][num_features])/2;
-                    child = evalChild(child, num_repetitions);
+                    try {
+                    	child = evalChild(child, num_repetitions);	
+                    }
+                    catch (InterruptedException e)
+                    {
+	                	System.out.println("caught interrupted exception");
+	                }
+                    
 	            }
 	            iter++;
             } while (child[game.numFeatures()] < worst_performer_score && iter < 5);

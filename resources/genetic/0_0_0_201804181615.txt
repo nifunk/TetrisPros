@@ -1,0 +1,5 @@
+2018-04-18 16:15:35.358
+Number of generations: 0
+Size of population: 0
+Heuristic 0
+11
