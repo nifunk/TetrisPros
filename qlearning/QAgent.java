@@ -1,6 +1,6 @@
-package qlearning;
+/*package qlearning;
 
-import autoencoder.StateEncoder;
+//import autoencoder.StateEncoder;
 import game.Game;
 import game.Results;
 
@@ -113,4 +113,4 @@ public class QAgent
 
     public Game getGame() {return _game; }
 
-}
+}*/

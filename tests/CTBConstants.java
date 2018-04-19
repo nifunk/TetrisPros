@@ -1,4 +1,4 @@
-package tests;
+/*package tests;
 
 public class CTBConstants
 {
@@ -13,4 +13,4 @@ public class CTBConstants
     public static int frame_delay   = 4;
     public static int window_width  = 200;
     public static int window_height = 400;
-}
+}*/

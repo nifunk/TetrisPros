@@ -1,4 +1,4 @@
-package tests;
+/*package tests;
 
 import game.Game;
 import game.Results;
@@ -217,4 +217,4 @@ public class CTB extends Game
         }
         return samples;
     }
-}
+}*/

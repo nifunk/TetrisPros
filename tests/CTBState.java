@@ -1,4 +1,4 @@
-package tests;
+/*package tests;
 
 import java.util.Random;
 
@@ -62,4 +62,4 @@ public class CTBState {
             dx = vel_x; dy = vel_y;
         }
     }
-}
+}*/

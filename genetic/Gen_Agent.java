@@ -68,8 +68,11 @@ public class Gen_Agent {
 
         //Need this?! - doubt it
         Results results  = new Results(0, new int[]{0}, false);
+        //int cleared_so_far = 0;
 
         while (! results.terminated) {
+
+
             double[] score = new double[all_actions]; //to eval the moves
             //the higher positive!! the score the better so preinit with -10000 so that no illegal moves taken
             Arrays.fill(score, Double.NEGATIVE_INFINITY);
@@ -82,7 +85,7 @@ public class Gen_Agent {
                     Results outcome = game.virtual_move(game.state(),move);
                     if (outcome.terminated!=true){ //this means game is not over in this drive!
                         //calculate all features!!!
-                        //TODO: replace this function by operator overloading to calculate differential features!!!
+                        //TODO: GO ONE LEVEL DEEPER MAYBE
                         double[] features = game.features(outcome);
                         double score_ = 0;
                         //calculate the score
@@ -90,45 +93,34 @@ public class Gen_Agent {
                             score_ = score_ + weights[k]*features[k];
                         }
                         score[move] = score_;
+
+                    for (int r=0;r<7;r++){
+                        int[] new_state = outcome.state;
+                        new_state[new_state[0]] = r;
+                        double[] abc = playGame(game.state());
+                        int best_choice = bestMove(abc);
+                        score[move] = score[move] + abc[best_choice]/7;
                     }
+
+                    }
+
 
                 }
             }
 
         //Step5: choose best move
-            double best_score = score[0];
-            int best_move = 0;
-            //find first valid move
-            for(int i=0;i<all_actions;i++){
-                if (game.checkAction(i)){
-                    best_score = score[i];
-                    best_move = i;
-                    break;
-                }
-            }
-
-            for(int i=(best_move+1);i<all_actions;i++){
-                if ((score[i]>best_score)&game.checkAction(i)){
-                    best_score = score[i];
-                    best_move = i;
-                    break;
-                }
-            }
-
-            for(int i=(best_move+1);i<all_actions;i++){
-                if ((score[i]>best_score)&game.checkAction(i)){
-                    best_score = score[i];
-                    best_move = i;
-                }
-			}
         //Step6: execute this best move
-            results = game.step(best_move);
+            results = game.step(bestMove(score));
         //Step7: save reward such that You know how succesfull these weights were!!
             //TETRIS: NUMBER CLEARED ROWS!
             //CTB: -1* absolute distance between ball and board -> if we search for maximum we find the best!!!
             total_reward = results.reward;
+            cleared_so_far = cleared_so_far+1;
+            //if (cleared_so_far%1000 == 0){
+            //    System.out.println("Currently played "+cleared_so_far+" stones.");
+            //}
         }
-        //System.out.println("You have completed "+total_reward+" rows.");
+        System.out.println("You have completed "+total_reward+" rows.");
         game = game.restart();
         return (int)total_reward;
     }
@@ -555,5 +547,58 @@ public class Gen_Agent {
     }
 
     public Game getGame() {return game; }
+
+    public double[] playGame(int[] state){
+        int all_actions = game.numActions();
+        int num_features = game.numFeatures();
+        double[] score = new double[all_actions]; //to eval the moves
+        //the higher positive!! the score the better so preinit with -10000 so that no illegal moves taken
+        Arrays.fill(score, Double.NEGATIVE_INFINITY);
+        //Arrays.fill(score, Double.POSITIVE_INFINITY);
+        //STEP3: if valid action - play perform the actions virtually and compute the features
+        for (int move=0; move<all_actions; move++){
+            if (game.checkAction(move)){
+                //calculate the features on the initial board configuration:
+                //TODO: here calculate the features on the Ausgangslage!!
+                Results outcome = game.virtual_move(state,move);
+                if (outcome.terminated!=true){ //this means game is not over in this drive!
+                    //calculate all features!!!
+                    //TODO: GO ONE LEVEL DEEPER MAYBE
+                    double[] features = game.features(outcome);
+                    double score_ = 0;
+                    //calculate the score
+                    for (int k=0; k<num_features;k++){
+                        score_ = score_ + weights[k]*features[k];
+                    }
+                    score[move] = score_;
+                }
+
+            }
+        }
+        return score;
+    }
+
+    int bestMove(double[] score){
+        int all_actions = game.numActions();
+        //Step5: choose best move
+        double best_score = score[0];
+        int best_move = 0;
+        //find first valid move
+        for(int i=0;i<all_actions;i++){
+            if (game.checkAction(i)){
+                best_score = score[i];
+                best_move = i;
+                break;
+            }
+        }
+
+        for(int i=(best_move+1);i<all_actions;i++){
+            if ((score[i]>best_score)&game.checkAction(i)){
+                best_score = score[i];
+                best_move = i;
+            }
+        }
+        return best_move;
+    }
 
 }

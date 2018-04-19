@@ -1,4 +1,4 @@
-package tests;
+/*package tests;
 
 import qlearning.QAgent;
 
@@ -22,4 +22,4 @@ public class CTBPlayerQ {
 
         System.exit(0);
     }
-}
+}*/

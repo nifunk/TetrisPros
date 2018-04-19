@@ -31,7 +31,7 @@ public class Player {
 
 		//For Genetic algorithm: -> HAND CRAFTED FEATURES:
 		Gen_Agent agent = new Gen_Agent(new TetrisInterface());
-		boolean want_to_train = true;
+		boolean want_to_train = false;
 
 		if(!want_to_train){
 			//SIMPLY PLAY
@@ -42,7 +42,7 @@ public class Player {
 			agent.loadMatrix("11_feat_ourbest_1.txt");
 			////let the player act
 			System.out.println("Simple agent performance was launched...");
-			////agent.getGame().activateVisualisation();
+			//agent.getGame().activateVisualisation();
 			agent.perform();
 
 		}

@@ -1,4 +1,4 @@
-package tests;
+/*package tests;
 
 import genetic.Gen_Agent;
 
@@ -22,4 +22,4 @@ public class CTBPlayerG {
 
         System.exit(0);
     }
-}
+}*/
