@@ -427,7 +427,7 @@ public class Gen_Agent {
 
         // System.out.println(" <-------------------------- EXITING CHILD ");
         // System.out.println(" <-------------------------- EXITING CHILD ");
-        System.out.println(" <-------------------------- EXITING CHILD ");
+        // System.out.println(" <-------------------------- EXITING CHILD ");
         child[game.numFeatures()] = score_best;
     	return child;
     }
