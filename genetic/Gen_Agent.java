@@ -173,7 +173,7 @@ public class Gen_Agent {
 
         // NOT NEEDED
         public int getVal() {
-            System.out.println("Returning " + this.retVal + " rows");
+            // System.out.println("Returning " + this.retVal + " rows");
             return this.retVal;
         }
     }
@@ -369,7 +369,7 @@ public class Gen_Agent {
 	            double[] store_score = new double[num_repetitions];
 	            Performer[] performers = new Performer[num_repetitions];
 	            for (int j = 0; j < num_repetitions; j++) {
-	                performers[j] = new Performer(weights);
+	                performers[j] = new Performer(this.weights);
 	                performers[j].setGame(j);
 	                executor.execute(performers[j]);
 	                // store_score[j] = performer.getVal();
@@ -379,7 +379,9 @@ public class Gen_Agent {
 	            executor.awaitTermination(1000, TimeUnit.MINUTES);
 	            for (int j = 0 ; j < num_repetitions; j++)
 	            {
-	                store_score[j] = Gen_Agent.this.perf_scores[j];
+	                store_score[j] = performers[j].getVal();
+	                // System.out.println("Score : " + store_score[j]);
+	                // store_score[j] = Gen_Agent.this.perf_scores[j];
 	            }
 
 	            double score_best = store_score[0];
@@ -390,7 +392,8 @@ public class Gen_Agent {
 	            }
 	            score_best = score_best/num_repetitions;
 	            
-	            population[game.numFeatures()] = score_best;
+	            this.population[game.numFeatures()] = score_best;
+	            System.out.println("Score : " + score_best);
     		}
     		catch (InterruptedException e)
     		{
@@ -417,7 +420,7 @@ public class Gen_Agent {
                 this.weights[j] = population[i][j];
             }
 
-            evaluators[i] = new Evaluator(population[i], num_repetitions, weights);
+            evaluators[i] = new Evaluator(population[i], num_repetitions, this.weights);
             executor1.execute(evaluators[i]);
             
         }
@@ -427,6 +430,7 @@ public class Gen_Agent {
         for (int i = 0; i < population.length; i++)
         {
         	population[i] = evaluators[i].getPopulation();
+        	System.out.println("Returned : " + population[i][game.numFeatures()]);
         }
         
         sortbyColumn(population,game.numFeatures());
@@ -439,9 +443,6 @@ public class Gen_Agent {
             this.weights[j] = child[j];
         }
         
-        // System.out.println(" IN CHILD -------------------------->");
-        // System.out.println(" IN CHILD -------------------------->");
-        // System.out.println(" IN CHILD -------------------------->");
         //play num_repetition times
         ExecutorService executor = Executors.newFixedThreadPool(num_repetitions);
         double[] store_score = new double[num_repetitions];
@@ -458,8 +459,8 @@ public class Gen_Agent {
         executor.awaitTermination(1000, TimeUnit.MINUTES);
         for (int j = 0 ; j < num_repetitions; j++)
         {
-            // store_score[j] = performers[j].getVal();
-            store_score[j] = this.perf_scores[j];
+            store_score[j] = performers[j].getVal();
+            // store_score[j] = this.perf_scores[j];
         }
 
         double score_best = store_score[0];
@@ -477,9 +478,6 @@ public class Gen_Agent {
         }
         score_best = score_best/num_repetitions;
 
-        // System.out.println(" <-------------------------- EXITING CHILD ");
-        // System.out.println(" <-------------------------- EXITING CHILD ");
-        // System.out.println(" <-------------------------- EXITING CHILD ");
         child[game.numFeatures()] = score_best;
     	return child;
     }
