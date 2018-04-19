@@ -426,7 +426,7 @@ public class Gen_Agent {
                             child[j] = input_population[parent1][j];
                     }
                     for (int j = line; j < num_features; j++) {
-                            child[j] = input_population[parent1][j];
+                            child[j] = input_population[parent2][j];
                     }
                     child[num_features] = (input_population[parent1][num_features] + input_population[parent2][num_features])/2;
                     child = evalChild(child, num_repetitions);
