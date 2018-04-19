@@ -109,7 +109,7 @@ public class Gen_Agent {
                 Arrays.fill(score, Double.NEGATIVE_INFINITY);
                 //Arrays.fill(score, Double.POSITIVE_INFINITY);
             //STEP3: if valid action - play perform the actions virtually and compute the features
-                for (int move=0; move<all_actions; move++){
+                for (int move=0; move < all_actions; move++){
                     if (game.checkAction(move)){
                         //calculate the features on the initial board configuration:
                         //TODO: here calculate the features on the Ausgangslage!!
@@ -197,7 +197,7 @@ public class Gen_Agent {
         weights_lowerbound[3]=0;
         weights_upperbound[3]=100000;
 
-        //generate initial population
+        // generate initial population
         for (int i=0;i<size_init_population;i++){
             for (int j = 0; j<game.numFeatures(); j++){
                 //TODO: instead of always starting from a completely random population, add some good individuals from the beginning
@@ -205,6 +205,25 @@ public class Gen_Agent {
                 this.weights_loaded = true;
             }
         }
+
+        // init_population[0] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581, 86516.3};
+        // init_population[1] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,78561.4};
+        // init_population[2] = new double[] {-0.03497211045837952,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,76210.8};
+        // init_population[3] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,70503.5};
+        // init_population[4] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,70491.6};
+        // init_population[5] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-1023.6018123274217,69749.8};
+        // init_population[6] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,68253.3};
+        // init_population[7] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,55558.3};
+        // init_population[8] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,53088.1};
+        // init_population[9] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-19430.13402577235,-848.1350849151581,51523.7};
+
+        // for (int i=10;i<size_init_population;i++){
+        //         //TODO: instead of always starting from a completely random population, add some good individuals from the beginning
+        //     for (int j = 0; j<game.numFeatures(); j++) {
+        // 		init_population[i][j]= getRandom(weights_lowerbound[j],weights_upperbound[j]);
+        // 	}
+        //     this.weights_loaded = true;
+        // }
         System.out.println("Initial population generated....");
         //play with all the 1000 combinations and store the highest
         try {
@@ -326,57 +345,90 @@ public class Gen_Agent {
         return (lower_bound+random*(upper_bound-lower_bound));
     }
 
+    public class Evaluator implements Runnable {
+    	
+    	private double[] population;
+    	private int num_repetitions;
+    	private double[] weights;
+
+    	public Evaluator(double[] population, int num_repetitions, double[] weights)
+    	{
+    		this.population = population;
+    		this.num_repetitions = num_repetitions;
+    		this.weights = weights;
+    	}
+
+    	public double[] getPopulation()
+    	{
+    		return this.population;
+    	}
+
+    	public void run() {
+    		try {
+    			ExecutorService executor = Executors.newFixedThreadPool(num_repetitions);
+	            double[] store_score = new double[num_repetitions];
+	            Performer[] performers = new Performer[num_repetitions];
+	            for (int j = 0; j < num_repetitions; j++) {
+	                performers[j] = new Performer(weights);
+	                performers[j].setGame(j);
+	                executor.execute(performers[j]);
+	                // store_score[j] = performer.getVal();
+	            }
+
+	            executor.shutdown();
+	            executor.awaitTermination(1000, TimeUnit.MINUTES);
+	            for (int j = 0 ; j < num_repetitions; j++)
+	            {
+	                store_score[j] = Gen_Agent.this.perf_scores[j];
+	            }
+
+	            double score_best = store_score[0];
+
+	            
+	            for (int j = 1; j < num_repetitions; j++) {
+	                score_best = score_best + store_score[j];
+	            }
+	            score_best = score_best/num_repetitions;
+	            
+	            population[game.numFeatures()] = score_best;
+    		}
+    		catch (InterruptedException e)
+    		{
+    			System.out.println("Interruption in Performer");
+    		}
+
+    		
+        }
+
+    }
+    	
+
     //given a population, execute the game with it and store the results in the resulting array!
     //return: in descending order sorted array!
     private double[][] evalPopulation(double[][] population, int num_repetitions) throws InterruptedException {
         int size_population = population.length;
+
+        ExecutorService executor1 = Executors.newFixedThreadPool(population.length);
+        Evaluator[] evaluators = new Evaluator[population.length];
+        
         for (int i=0;i<size_population;i++) {
             //set weights in this iteration
             for (int j = 0; j < game.numFeatures(); j++) {
                 this.weights[j] = population[i][j];
             }
-            //play num_repetition times
-            ExecutorService executor = Executors.newFixedThreadPool(num_repetitions);
-            double[] store_score = new double[num_repetitions];
-            Performer[] performers = new Performer[num_repetitions];
-            for (int j = 0; j < num_repetitions; j++) {
-                performers[j] = new Performer(this.weights);
-                performers[j].setGame(j);
-                executor.execute(performers[j]);
-                // store_score[j] = performer.getVal();
-            }
 
-            executor.shutdown();
-            executor.awaitTermination(1000, TimeUnit.MINUTES);
-            for (int j = 0 ; j < num_repetitions; j++)
-            {
-                // System.out.println("Rows cleared is publicly : " + performers[j].retVal);
-                // store_score[j] = performers[j].getVal();
-                store_score[j] = this.perf_scores[j];
-            }
-
-            double score_best = store_score[0];
-
-            //HERE: store BEST SCORE VALUE!
-            //for (int j = 1; j < num_repetitions; j++) {
-            //    if (store_score[j] > score_best) {
-            //        score_best = store_score[j];
-            //    }
-            //}
-
-            //OR: store the MEAN of all scores:
-            for (int j = 1; j < num_repetitions; j++) {
-                score_best = score_best + store_score[j];
-            }
-            score_best = score_best/num_repetitions;
-            // System.out.println("CHECK store score is : " + this.perf_scores[0]);
-            // System.out.println("CHECK store score is : " + this.perf_scores[0]);
-            // System.out.println("CHECK store score is : " + this.perf_scores[0]);
-
-
-            population[i][game.numFeatures()] = score_best;
+            evaluators[i] = new Evaluator(population[i], num_repetitions, weights);
+            executor1.execute(evaluators[i]);
+            
         }
         //Sort descending by the score!
+        executor1.shutdown();
+        executor1.awaitTermination(1000, TimeUnit.MINUTES);
+        for (int i = 0; i < population.length; i++)
+        {
+        	population[i] = evaluators[i].getPopulation();
+        }
+        
         sortbyColumn(population,game.numFeatures());
         return population;
     }
@@ -427,7 +479,7 @@ public class Gen_Agent {
 
         // System.out.println(" <-------------------------- EXITING CHILD ");
         // System.out.println(" <-------------------------- EXITING CHILD ");
-        System.out.println(" <-------------------------- EXITING CHILD ");
+        // System.out.println(" <-------------------------- EXITING CHILD ");
         child[game.numFeatures()] = score_best;
     	return child;
     }
@@ -549,7 +601,7 @@ public class Gen_Agent {
                             child[j] = input_population[parent1][j];
                     }
                     for (int j = line; j < num_features; j++) {
-                            child[j] = input_population[parent1][j];
+                            child[j] = input_population[parent2][j];
                     }
                     child[num_features] = (input_population[parent1][num_features] + input_population[parent2][num_features])/2;
                     try {
