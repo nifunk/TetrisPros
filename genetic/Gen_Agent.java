@@ -68,8 +68,6 @@ public class Gen_Agent {
 
         //Need this?! - doubt it
         Results results  = new Results(0, new int[]{0}, false);
-        //int cleared_so_far = 0;
-
         while (! results.terminated) {
 
 
@@ -115,7 +113,6 @@ public class Gen_Agent {
             //TETRIS: NUMBER CLEARED ROWS!
             //CTB: -1* absolute distance between ball and board -> if we search for maximum we find the best!!!
             total_reward = results.reward;
-            cleared_so_far = cleared_so_far+1;
             //if (cleared_so_far%1000 == 0){
             //    System.out.println("Currently played "+cleared_so_far+" stones.");
             //}

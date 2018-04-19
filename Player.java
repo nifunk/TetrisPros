@@ -1,10 +1,15 @@
 import game.TetrisInterface;
 import genetic.Gen_Agent;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 
 public class Player {
 	private static int num_generations, population_size, child_heuristic;
 	private static double fraction, prop_mutation, fraction_direct_pass;
+
+	public int num_cleared_rows;
 
 	public static void main(String[] args) {
 		//Arguments to pass for running
@@ -17,7 +22,18 @@ public class Player {
 	        prop_mutation= Double.parseDouble(args[4]);
 	        fraction_direct_pass = Double.parseDouble(args[5]);
 		}
-		new Player();
+
+        try
+        {
+            final FileWriter fw = new FileWriter("resources/runs.txt");
+            for(int iter = 0; iter < 50; iter++)
+            {
+                Player player = new Player();
+                fw.write(player.num_cleared_rows + ", ");
+            }
+            fw.close();
+        } catch (IOException e) { e.printStackTrace(); }
+
 	}
 
 	private Player() {
@@ -33,6 +49,7 @@ public class Player {
 		Gen_Agent agent = new Gen_Agent(new TetrisInterface());
 		boolean want_to_train = false;
 
+
 		if(!want_to_train){
 			//SIMPLY PLAY
 			//agent.loadMatrix("best_4_features.txt");
@@ -43,7 +60,7 @@ public class Player {
 			////let the player act
 			System.out.println("Simple agent performance was launched...");
 			//agent.getGame().activateVisualisation();
-			agent.perform();
+            num_cleared_rows = agent.perform();
 
 		}
 		else{
@@ -66,5 +83,7 @@ public class Player {
     
 		System.exit(0);
 	}
+
+
 	
 }
