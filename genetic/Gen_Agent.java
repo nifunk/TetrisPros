@@ -359,10 +359,14 @@ public class Gen_Agent {
 
     	public Evaluator(double[] population, int num_repetitions, double[] weights)
     	{
-    		System.out.println("weights inside : " + weights[1]);
+    		// System.out.println("weights inside : " + weights[1]);
+    		this.weights = new double[weights.length];
     		this.population = population;
     		this.num_repetitions = num_repetitions;
-    		this.weights = weights;
+    		for (int j = 0; j < game.numFeatures(); j++)
+    		{
+    			this.weights[j] = population[j];
+    		}
     	}
 
     	public double[] getPopulation()
@@ -375,6 +379,9 @@ public class Gen_Agent {
     			ExecutorService executor = Executors.newFixedThreadPool(num_repetitions);
 	            double[] store_score = new double[num_repetitions];
 	            Performer[] performers = new Performer[num_repetitions];
+	            // System.out.println("weights : " + this.weights[1]);
+	            // System.out.println("weights pop : " + this.population[1]);
+	            
 	            for (int j = 0; j < num_repetitions; j++) {
 	                performers[j] = new Performer(this.weights);
 	                performers[j].setGame(j);
@@ -387,7 +394,7 @@ public class Gen_Agent {
 	            for (int j = 0 ; j < num_repetitions; j++)
 	            {
 	                store_score[j] = performers[j].getVal();
-	                System.out.println("Score : " + store_score[j]);
+	                // System.out.println("Score : " + store_score[j]);
 	                // store_score[j] = Gen_Agent.this.perf_scores[j];
 	            }
 
@@ -427,7 +434,7 @@ public class Gen_Agent {
                 this.weights[j] = population[i][j];
             }
 
-            System.out.println("weights passed : " + this.weights[1]);
+            // System.out.println("weights passed : " + this.weights[1]);
             evaluators[i] = new Evaluator(population[i], num_repetitions, this.weights);
             executor1.execute(evaluators[i]);
             
@@ -438,7 +445,7 @@ public class Gen_Agent {
         for (int i = 0; i < population.length; i++)
         {
         	population[i] = evaluators[i].getPopulation();
-        	System.out.println("Returned : " + population[i][game.numFeatures()]);
+        	// System.out.println("Returned : " + population[i][game.numFeatures()]);
         }
         
         sortbyColumn(population,game.numFeatures());
