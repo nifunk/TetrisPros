@@ -359,6 +359,7 @@ public class Gen_Agent {
 
     	public Evaluator(double[] population, int num_repetitions, double[] weights)
     	{
+    		System.out.println("weights inside : " + weights[1]);
     		this.population = population;
     		this.num_repetitions = num_repetitions;
     		this.weights = weights;
@@ -426,6 +427,7 @@ public class Gen_Agent {
                 this.weights[j] = population[i][j];
             }
 
+            System.out.println("weights passed : " + this.weights[1]);
             evaluators[i] = new Evaluator(population[i], num_repetitions, this.weights);
             executor1.execute(evaluators[i]);
             
