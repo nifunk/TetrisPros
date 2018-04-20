@@ -173,7 +173,7 @@ public class Gen_Agent {
 
         // NOT NEEDED
         public int getVal() {
-            System.out.println("Returning " + this.retVal + " rows");
+            // System.out.println("Returning " + this.retVal + " rows");
             return this.retVal;
         }
     }
@@ -325,6 +325,11 @@ public class Gen_Agent {
         double random = r.nextDouble();
         return (lower_bound+random*(upper_bound-lower_bound));
     }
+    private double getRandomG(double mean,double std_dev){
+        Random r = new Random();
+        double random = r.nextGaussian();
+        return (mean+random*std_dev);
+    }
 
     //given a population, execute the game with it and store the results in the resulting array!
     //return: in descending order sorted array!
@@ -350,7 +355,9 @@ public class Gen_Agent {
             executor.awaitTermination(1000, TimeUnit.MINUTES);
             for (int j = 0 ; j < num_repetitions; j++)
             {
-                // System.out.println("Rows cleared is publicly : " + performers[j].retVal);
+                // System.out.println("Rows cleared is publicly : " + this.perf_scores[j]);
+                // System.out.println("Rows cleared is privately : " + performers[j].getVal());
+                
                 // store_score[j] = performers[j].getVal();
                 store_score[j] = this.perf_scores[j];
             }
@@ -570,7 +577,7 @@ public class Gen_Agent {
             	new_population[i][j] = child[j];
                 double mutate_rand_val = getRandom(0, 1);
                 if(mutate_rand_val < prop_mutation){
-                    new_population[i][j] = new_population[i][j] * getRandom(0, 1.5);
+                    new_population[i][j] = new_population[i][j] * getRandomG(1, 0.1);
                 }
             }
         }
