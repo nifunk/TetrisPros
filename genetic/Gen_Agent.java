@@ -345,6 +345,12 @@ public class Gen_Agent {
         return (lower_bound+random*(upper_bound-lower_bound));
     }
 
+	private double getRandomG(double mean,double std_dev){
+        Random r = new Random();
+        double random = r.nextGaussian();
+        return (mean+random*std_dev);
+    }    
+
     public class Evaluator implements Runnable {
     	
     	private double[] population;
@@ -380,7 +386,7 @@ public class Gen_Agent {
 	            for (int j = 0 ; j < num_repetitions; j++)
 	            {
 	                store_score[j] = performers[j].getVal();
-	                // System.out.println("Score : " + store_score[j]);
+	                System.out.println("Score : " + store_score[j]);
 	                // store_score[j] = Gen_Agent.this.perf_scores[j];
 	            }
 
@@ -393,7 +399,7 @@ public class Gen_Agent {
 	            score_best = score_best/num_repetitions;
 	            
 	            this.population[game.numFeatures()] = score_best;
-	            System.out.println("Score : " + score_best);
+	            // System.out.println("Score : " + score_best);
     		}
     		catch (InterruptedException e)
     		{
@@ -533,9 +539,16 @@ public class Gen_Agent {
             
             int iter = 0;
             do{
-            	int parent1 = pickParent(input_population, fraction);
-	            int parent2 = pickParent(input_population, fraction);
-	            //heuristic 1
+            	int parent1, parent2;
+            	int iter1 = 0;
+            	do {
+
+            		parent1 = pickParent(input_population, fraction);
+	            	parent2 = pickParent(input_population, fraction);
+	            	iter1++;
+	            
+            	} while (parent1 == parent2 && iter1 < 5);
+            	//heuristic 1
 	            if (child_heuristic == 0){
 	                double rand_val = getRandom(0, 1);
 	                if (rand_val > 0.5){
@@ -620,7 +633,7 @@ public class Gen_Agent {
             	new_population[i][j] = child[j];
                 double mutate_rand_val = getRandom(0, 1);
                 if(mutate_rand_val < prop_mutation){
-                    new_population[i][j] = new_population[i][j] * getRandom(0, 1.5);
+                    new_population[i][j] = new_population[i][j] * getRandomG(1, 0.1);
                 }
             }
         }
