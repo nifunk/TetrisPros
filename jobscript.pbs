@@ -1,14 +1,14 @@
 #!/bin/bash
 #PBS -l select=1:ncpus=10:mpiprocs=10
-#PBS -l walltime=120:00:00
+#PBS -l walltime=24:00:00
 #numruns=$1
 gen=(1000)
-psize=300
+psize=20
 heur=0
 frac=0.25
 probmut=0.05
 fracpas=0.3
-cd /home/users/nus/e0269734/TetrisPros
+cd /home/users/nus/e0268631/TetrisPros
 module load java
 javac Player.java
 for i in {0..0}

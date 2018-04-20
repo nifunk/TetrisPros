@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import game.TetrisInterface;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.TimeUnit;
+import java.util.Random;
 
 public class Gen_Agent {
 
@@ -22,6 +23,7 @@ public class Gen_Agent {
     private double[]    weights;
     private boolean     weights_loaded;
     private int[]       perf_scores;
+    Random random = new Random();
 
     public Gen_Agent(Game game)
     {
@@ -118,6 +120,7 @@ public class Gen_Agent {
                             //calculate all features!!!
                             //TODO: replace this function by operator overloading to calculate differential features!!!
                             double[] features = game.features(outcome);
+
                             double score_ = 0;
                             //calculate the score
                             for (int k=0; k<num_features;k++){
@@ -186,16 +189,16 @@ public class Gen_Agent {
         //feature 1 must be pushed -> positive
 
         int size_init_population = population_size; //was 500
-        int num_repetitions = 10;
+        int num_repetitions = 5;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[game.numFeatures()];
-        Arrays.fill(weights_lowerbound, -100000.0);
+        Arrays.fill(weights_lowerbound, 0.0);
         double[]weights_upperbound = new double[game.numFeatures()];
-        Arrays.fill(weights_upperbound, 100000.0);
+        Arrays.fill(weights_upperbound, 1.0);
         //manual cheating:
-        Arrays.fill(weights_upperbound, 0.0);
-        weights_lowerbound[3]=0;
-        weights_upperbound[3]=100000;
+        // Arrays.fill(weights_upperbound, 0.0);
+        // weights_lowerbound[3]=0;
+        // weights_upperbound[3]=100000;
 
         // generate initial population
         for (int i=0;i<size_init_population;i++){
@@ -264,7 +267,7 @@ public class Gen_Agent {
              //TODO: train over multiple generations 
             //STEP3: crossover and mutation
             //double[][] selected_population = doCrossingandMutation(init_population,tokeep,size_new_pop,prop_mutation,weights_lowerbound,weights_upperbound);
-            init_population = doCrossingandMutation(init_population, num_repetitions, fraction, child_heuristic, prop_mutation, fraction_direct_pass);
+            init_population = doCrossingandMutation_new(init_population, num_repetitions, fraction, child_heuristic, prop_mutation, fraction_direct_pass);
             System.out.println( (i+1) + " Selected population created....");
             
             int minLenght = Math.min(10, init_population.length);
@@ -353,9 +356,13 @@ public class Gen_Agent {
 
     	public Evaluator(double[] population, int num_repetitions, double[] weights)
     	{
-    		this.population = population;
+    		this.weights = new double[weights.length];
+            this.population = population;
     		this.num_repetitions = num_repetitions;
-    		this.weights = weights;
+    		for(int j = 0 ; j < game.numFeatures(); j++)
+            {
+                this.weights[j] = population[j];
+            }
     	}
 
     	public double[] getPopulation()
@@ -481,6 +488,104 @@ public class Gen_Agent {
         child[game.numFeatures()] = score_best;
     	return child;
     }
+
+
+
+
+
+
+    int pickParentnew(double[][]input_population, double[][]eval_population, float totalFitness, int num_features){
+        float decision = random.nextFloat() * totalFitness;
+        int j;
+
+        for(j = 0; j < input_population.length; j++) {
+            double fitness = eval_population[j][num_features];
+
+            if(decision < fitness) {
+                return j;
+            }
+            else {
+                decision -= fitness;
+            }
+        }
+
+        return 0;
+    }
+
+
+
+
+
+
+    private double[][] doCrossingandMutation_new(double[][] input_population, int num_repetitions, double fraction, int child_heuristic, double prop_mutation, double fraction_direct_pass){
+        int size_input = input_population.length;
+        int num_features = game.numFeatures();
+        float crossoverRate = 0.6f;
+
+        double[][]new_population = new double[input_population.length][game.numFeatures()+1];
+        double[][]eval_population = new double[input_population.length][game.numFeatures()+1];
+
+        try {
+            eval_population = evalPopulation(input_population, num_repetitions); // for the parent population
+        }
+        catch (InterruptedException e)
+        {
+            System.out.println("caught interrupted exception");
+        }
+
+        float totalFitness = 0.0f;
+        for(int j = 0; j < size_input; j++) {
+            totalFitness += eval_population[j][num_features];
+        }
+
+        int pop_size_thus_far = 0;
+
+        while(pop_size_thus_far < size_input) {
+            int parent1 = pickParentnew(input_population, eval_population, totalFitness, num_features);
+            int parent2 = pickParentnew(input_population, eval_population, totalFitness, num_features);
+
+            if(random.nextFloat() < crossoverRate) {//cross over happens
+                int crossoverPoint = random.nextInt(num_features + 1);
+
+                System.arraycopy(input_population[parent1], 0, new_population[pop_size_thus_far], 0, crossoverPoint);
+                System.arraycopy(input_population[parent2], 0, new_population[pop_size_thus_far + 1], 0, crossoverPoint);
+                System.arraycopy(input_population[parent1], crossoverPoint, new_population[pop_size_thus_far + 1], crossoverPoint, num_features - crossoverPoint);
+                System.arraycopy(input_population[parent2], crossoverPoint, new_population[pop_size_thus_far], crossoverPoint, num_features - crossoverPoint);
+                pop_size_thus_far = pop_size_thus_far + 2;
+            }
+            else {
+                for(int j = 0; j < game.numFeatures() + 1; j++){
+                    new_population[pop_size_thus_far][j] = input_population[parent1][j];
+                }
+                pop_size_thus_far++;
+
+                for(int j = 0; j < game.numFeatures() + 1; j++){
+                    new_population[pop_size_thus_far][j] = input_population[parent2][j];
+                }
+                pop_size_thus_far++;
+            }
+
+            for(int j = 0; j < game.numFeatures() + 1; j++){
+                double mutate_rand_val = getRandom(0, 1);
+                if(mutate_rand_val < prop_mutation){
+                    new_population[pop_size_thus_far-2][j] = new_population[pop_size_thus_far-2][j] * getRandom(0.8, 1.2);
+                }
+            }
+
+            for(int j = 0; j < game.numFeatures() + 1; j++){
+                double mutate_rand_val = getRandom(0, 1);
+                if(mutate_rand_val < prop_mutation){
+                    new_population[pop_size_thus_far-1][j] = new_population[pop_size_thus_far-1][j] * getRandom(0, 1.5);
+                }
+            } 
+        }
+
+        return new_population;
+    }
+
+
+
+
 
 
     int pickParent(double[][]input_population, double fraction){

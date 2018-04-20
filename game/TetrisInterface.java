@@ -12,6 +12,14 @@ public class TetrisInterface extends Game
     private State _state;
     private boolean _visualise_game = false;
 
+    private static final float roughnessWeight = 0.9f;
+    private static final float maxColumnHeightWeight = 0.8f;
+    private static final float numRowsClearedWeight = 0.8f;
+    private static final float hasLostWeight = 1;
+    private static final float numFaultsWeight = 6.0f;
+    private static final float pitDepthsWeight = 1.2f;
+    private static final float meanHeightDifferenceWeight = 0.85f;
+
     public TetrisInterface()
     {
         // Define game specific variables.
@@ -339,10 +347,14 @@ public class TetrisInterface extends Game
                 }
             }
 
+
+            
             int max_pile_height = height_map[0];                               //FEATURE!
             for (int i =1; i<field_width;i++){
                 if(height_map[i]>max_pile_height){max_pile_height=height_map[i];}
             }
+
+
 
             int min_pile_height = height_map[0];
             for (int i =1; i<field_width;i++){
@@ -350,6 +362,25 @@ public class TetrisInterface extends Game
             }
 
             int max_altitude_difference = max_pile_height - min_pile_height;           //FEATURE!
+
+
+            // FEATURE 1
+            int rough = 0;
+            for (int i = 0; i < field_width - 1; ++i) {
+                rough += Math.abs(height_map[i] - height_map[i + 1]);
+            }
+            float Roughness = -(float) rough * roughnessWeight;
+
+
+            // FEATURE 2
+            float MaxColumnHeight = -(float) max_pile_height * maxColumnHeightWeight;
+
+            // FEATURE 3
+            float NumRowsCleared = (float) num_cleared_rows * numRowsClearedWeight;
+
+            // FEATURE 4
+            float HasLost = terminal()? -10.0f : 10.0f;
+
 
             //calculate a map of "wells":
             int[]wells_map = new int[field_width];
@@ -391,6 +422,64 @@ public class TetrisInterface extends Game
                 if((virtual__state[3+i]==0) & ((i/field_width)<height_map[i%field_width])){total_num_holes++;}
             }
 
+            int tot_holes = 0;
+            for (int i = 0; i < field_width; i++) {
+                for (int j = height_map[i] - 1; j >= 0; --j) {
+                    if (virtual__state[3+i+j*field_width] == 0) {
+                        tot_holes++;
+                    }
+                }
+            }
+
+            // FEATURE 5
+            float NumFaults = -(float) tot_holes * numFaultsWeight;
+
+
+
+
+
+            int sumOfPitDepths = 0;
+
+            int pitHeight;
+            int leftOfPitHeight;
+            int rightOfPitHeight;
+
+            // pit depth of first column
+            pitHeight = height_map[0];
+            rightOfPitHeight = height_map[1];
+            int diff = rightOfPitHeight - pitHeight;
+            if (diff > 2) {
+                sumOfPitDepths += diff;
+            }
+
+            for (int col = 0; col < field_width - 2; col++) {
+                leftOfPitHeight = height_map[col];
+                pitHeight = height_map[col + 1];
+                rightOfPitHeight = height_map[col + 2];
+
+                int leftDiff = leftOfPitHeight - pitHeight;
+                int rightDiff = rightOfPitHeight - pitHeight;
+                int minDiff = leftDiff < rightDiff ? leftDiff : rightDiff;
+
+                if (minDiff > 2) {
+                    sumOfPitDepths += minDiff;
+                }
+            }
+
+            // pit depth of last column
+            pitHeight = height_map[field_width - 1];
+            leftOfPitHeight = height_map[field_width - 2];
+            diff = leftOfPitHeight - pitHeight;
+            if (diff > 2) {
+                sumOfPitDepths += diff;
+            }
+
+            // FEATURE 6
+            float PitDepths = -(float) sumOfPitDepths * pitDepthsWeight;
+
+
+
+
             //calculate horizontal transitions: (slightly other defined than paper)
             int hor_transitions = 0;                                                //FEATURE!
             //FOR LOOP OVER ENTIRE FIELD!!
@@ -414,11 +503,24 @@ public class TetrisInterface extends Game
             }
 
 
+
             //from there extract: aggregate height:
             int aggregate_height = 0;                                         //FEATURE
             for (int j=0; j<field_width; j++){
                 aggregate_height = aggregate_height + height_map[j];
             }
+
+            float meanHeight = (float) aggregate_height / field_width;
+
+            float avgDiff = 0;
+            for (int j=0; j<field_width; j++){
+                avgDiff += Math.abs(meanHeight - height_map[j]);
+            }
+
+            // FEATURE 7
+            float MeanHeightDifference = -(avgDiff / (float) field_width) * meanHeightDifferenceWeight;
+
+
 
             //from there extract: bumpieness:
             int bumpieness = 0;                                            //FEATURE!!
@@ -431,7 +533,7 @@ public class TetrisInterface extends Game
 
             //return new double[]{total_num_holes,num_cleared_rows,aggregate_height,bumpieness};
             //new: 11 features from paper!!!
-            return new double[]{max_pile_height,total_num_holes,conn_num_holes,num_cleared_rows,max_altitude_difference,max_well_depth,sum_of_wells,num_blocks,weighted_blocks,hor_transitions,ver_transitions};
+            return new double[]{Roughness, MaxColumnHeight, NumRowsCleared, HasLost, NumFaults, PitDepths, MeanHeightDifference};
         //}
     }
 
@@ -457,7 +559,7 @@ public class TetrisInterface extends Game
         //add +1 since rows cleared is already available after the virtual move!!!
         //TODO: adapt to function above
 
-        return /*encoder.encoderReady() ? encoder.getEncoderSize() :*/ (10+1);
+        return /*encoder.encoderReady() ? encoder.getEncoderSize() :*/ (6+1);
     }
 
     @Override
