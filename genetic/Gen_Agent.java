@@ -18,10 +18,21 @@ import java.util.concurrent.TimeUnit;
 
 public class Gen_Agent {
 
+	private final double OMEGA = 0.6;
+	private final double RHOP = 1.4;
+	private final double RHOG = 2.0;
+	private final double BOUND_HIGH = -1;
+	private final double BOUND_LOW = 1;
+	private final double BOUND_RANGE = BOUND_HIGH - BOUND_LOW;	
+
     private Game        game;
     private double[]    weights;
     private boolean     weights_loaded;
     private int[]       perf_scores;
+    private double[][] 	vel;
+    private double[][]  personalBestWeights;
+    private double[]    globalBest;
+    // private double[]	weightsInd;	
 
     public Gen_Agent(Game game)
     {
@@ -37,6 +48,33 @@ public class Gen_Agent {
     public double[] get_weights() {
         return this.weights;
     }
+
+    public double[] updatePos(int popIndex, double[] population) {
+		for (int i = 0; i < game.numFeatures(); i++) {
+			population[i] = population[i] + vel[popIndex][i];
+		}
+		return population;
+	}
+
+    public void initVels(int popIndex) {
+    	for (int i = 0; i < game.numFeatures(); i++)
+    	{
+    		this.vel[popIndex][i] = getRandom(0,1) * BOUND_RANGE * 2 - BOUND_RANGE;
+    	}
+    }
+
+    public void updateVel(double omega, double rhop, double rhog, int popIndex, double[] population) {
+		double rp, rg;
+
+		for (int i = 0; i < game.numFeatures(); i++) {
+			rp = getRandom(0, 1);
+			rg = getRandom(0, 1);
+
+			this.vel[popIndex][i] = omega * vel[popIndex][i] + rhop * rp * (personalBestWeights[popIndex][i] - population[i])
+					+ rhog * rg * (globalBest[i] - population[i]);
+		}
+	}
+
 
     /*public Gen_Agent(Game game, final String encoder_load_file)
     {
@@ -187,6 +225,7 @@ public class Gen_Agent {
 
         int size_init_population = population_size; //was 500
         int num_repetitions = 10;
+        // this.weightsInd = new double[population_size][game.numFeatures()];
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[game.numFeatures()];
         Arrays.fill(weights_lowerbound, -100000.0);
@@ -196,12 +235,18 @@ public class Gen_Agent {
         Arrays.fill(weights_upperbound, 0.0);
         weights_lowerbound[3]=0;
         weights_upperbound[3]=100000;
+        this.vel = new double[population_size][game.numFeatures()];
+        this.personalBestWeights = new double[population_size][game.numFeatures()+1];
+        this.globalBest = new double[game.numFeatures()+1];
 
         // generate initial population
         for (int i=0;i<size_init_population;i++){
+        	initVels(i);
             for (int j = 0; j<game.numFeatures(); j++){
                 //TODO: instead of always starting from a completely random population, add some good individuals from the beginning
                 init_population[i][j]= getRandom(weights_lowerbound[j],weights_upperbound[j]);
+                this.personalBestWeights[i][j] = init_population[i][j];
+                this.globalBest[j] = init_population[i][j];
                 this.weights_loaded = true;
             }
         }
@@ -430,8 +475,11 @@ public class Gen_Agent {
         
         for (int i=0;i<size_population;i++) {
             //set weights in this iteration
+            updateVel(OMEGA, RHOP, RHOG, i, population[i]);
+            population[i] = updatePos(i, population[i]);
             for (int j = 0; j < game.numFeatures(); j++) {
                 this.weights[j] = population[i][j];
+
             }
 
             // System.out.println("weights passed : " + this.weights[1]);
@@ -445,10 +493,24 @@ public class Gen_Agent {
         for (int i = 0; i < population.length; i++)
         {
         	population[i] = evaluators[i].getPopulation();
+        	if (population[i][game.numFeatures()] > this.personalBestWeights[i][game.numFeatures()])
+        	{
+        		for (int k = 0 ;k < game.numFeatures(); k++)
+        		{
+        			this.personalBestWeights[i][k] = population[i][k];
+        		}
+        	}
         	// System.out.println("Returned : " + population[i][game.numFeatures()]);
         }
         
         sortbyColumn(population,game.numFeatures());
+        if (population[0][game.numFeatures()] > this.globalBest[game.numFeatures()])
+        {
+        	for (int k = 0 ;k < game.numFeatures(); k++)
+    		{
+    			this.globalBest[k] = population[0][k];
+    		}
+        }
         return population;
     }
 
