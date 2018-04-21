@@ -12,13 +12,13 @@ public class TetrisInterface extends Game
     private State _state;
     private boolean _visualise_game = false;
 
-    private static final float roughnessWeight = 0.9f;
-    private static final float maxColumnHeightWeight = 0.8f;
-    private static final float numRowsClearedWeight = 0.8f;
-    private static final float hasLostWeight = 1;
-    private static final float numFaultsWeight = 6.0f;
-    private static final float pitDepthsWeight = 1.2f;
-    private static final float meanHeightDifferenceWeight = 0.85f;
+    private static final float wt_max_col = 0.8f;
+    private static final float wt_rows_clear = 0.8f;
+    private static final float wt_rough = 0.9f;
+    private static final float wt_mean_ht = 0.85f;
+    private static final float wt_pit_ht = 1.2f;
+    private static final float wt_num_holes = 6.0f;
+    
 
     public TetrisInterface()
     {
@@ -102,12 +102,8 @@ public class TetrisInterface extends Game
         int stone = _state.getNextPiece();
         //int stone = 0;
         int[][] field = _state.getField();
-        //System.out.println(Arrays.deepToString(field));
         int height = field.length; //height of field
-        //System.out.println(height);
         int width = field[0].length; //width of field
-        //System.out.println(width);
-        //System.out.printf("size is %d x %d%n", len1, len2);
 
         //building final _state array:
         //_state_arr[0] == position where the stone information is -> before there is the field!
@@ -127,8 +123,6 @@ public class TetrisInterface extends Game
                 _state_arr[h*width+w+3]= (field[h][w]!=0) ? 1 : 0;
             }
         }
-        //System.out.println(Arrays.toString(_state_arr));
-        //System.out.printf("size is %d", _state_arr.length);
         return _state_arr;
     }
 
@@ -248,8 +242,6 @@ public class TetrisInterface extends Game
             //from bottom to top of brick
             for(int h = height+pBottom[nextPiece][orient][i]; h < height+pTop[nextPiece][orient][i]; h++)
             {
-                //System.out.println(h);
-                //System.out.println(i+slot);
                 field[h][i+slot] = 1; //fill every field with 1!!!
             }
         }
@@ -369,17 +361,17 @@ public class TetrisInterface extends Game
             for (int i = 0; i < field_width - 1; ++i) {
                 rough += Math.abs(height_map[i] - height_map[i + 1]);
             }
-            float Roughness = -(float) rough * roughnessWeight;
+            float rough_feature = -(float) rough * wt_rough;
 
 
             // FEATURE 2
-            float MaxColumnHeight = -(float) max_pile_height * maxColumnHeightWeight;
+            float max_col_ht = -(float) max_pile_height * wt_max_col;
 
             // FEATURE 3
-            float NumRowsCleared = (float) num_cleared_rows * numRowsClearedWeight;
+            float num_clear_rows = (float) num_cleared_rows * wt_rows_clear;
 
             // FEATURE 4
-            float HasLost = terminal()? -10.0f : 10.0f;
+            float loss_move = terminal()? -10.0f : 10.0f;
 
 
             //calculate a map of "wells":
@@ -432,52 +424,42 @@ public class TetrisInterface extends Game
             }
 
             // FEATURE 5
-            float NumFaults = -(float) tot_holes * numFaultsWeight;
+            float num_tot_holes = -(float) tot_holes * wt_num_holes;
 
 
+            int pit_ht = height_map[0];
+            int left_pit_ht;
+            int right_pit_ht = height_map[1];
+            int sum_pit = 0;
+            int ht_diff = right_pit_ht - pit_ht;
 
-
-
-            int sumOfPitDepths = 0;
-
-            int pitHeight;
-            int leftOfPitHeight;
-            int rightOfPitHeight;
-
-            // pit depth of first column
-            pitHeight = height_map[0];
-            rightOfPitHeight = height_map[1];
-            int diff = rightOfPitHeight - pitHeight;
-            if (diff > 2) {
-                sumOfPitDepths += diff;
+            if (ht_diff > 2) {
+                sum_pit += ht_diff;
             }
 
-            for (int col = 0; col < field_width - 2; col++) {
-                leftOfPitHeight = height_map[col];
-                pitHeight = height_map[col + 1];
-                rightOfPitHeight = height_map[col + 2];
+            for (int i = 0; i < field_width - 2; i++) {
+                left_pit_ht = height_map[i];
+                pit_ht = height_map[i + 1];
+                right_pit_ht = height_map[i + 2];
 
-                int leftDiff = leftOfPitHeight - pitHeight;
-                int rightDiff = rightOfPitHeight - pitHeight;
-                int minDiff = leftDiff < rightDiff ? leftDiff : rightDiff;
+                int left_diff = left_pit_ht - pit_ht;
+                int right_diff = right_pit_ht - pit_ht;
+                int min_of_the_two_diff = left_diff < right_diff ? left_diff : right_diff;
 
-                if (minDiff > 2) {
-                    sumOfPitDepths += minDiff;
+                if (min_of_the_two_diff > 2) {
+                    sum_pit += min_of_the_two_diff;
                 }
             }
 
-            // pit depth of last column
-            pitHeight = height_map[field_width - 1];
-            leftOfPitHeight = height_map[field_width - 2];
-            diff = leftOfPitHeight - pitHeight;
-            if (diff > 2) {
-                sumOfPitDepths += diff;
+            pit_ht = height_map[field_width - 1];
+            left_pit_ht = height_map[field_width - 2];
+            ht_diff = left_pit_ht - pit_ht;
+            if (ht_diff > 2) {
+                sum_pit += ht_diff;
             }
 
             // FEATURE 6
-            float PitDepths = -(float) sumOfPitDepths * pitDepthsWeight;
-
-
+            float pit_ht_feature = -(float) sum_pit * wt_pit_ht;
 
 
             //calculate horizontal transitions: (slightly other defined than paper)
@@ -502,25 +484,11 @@ public class TetrisInterface extends Game
                 }
             }
 
-
-
             //from there extract: aggregate height:
             int aggregate_height = 0;                                         //FEATURE
             for (int j=0; j<field_width; j++){
                 aggregate_height = aggregate_height + height_map[j];
             }
-
-            float meanHeight = (float) aggregate_height / field_width;
-
-            float avgDiff = 0;
-            for (int j=0; j<field_width; j++){
-                avgDiff += Math.abs(meanHeight - height_map[j]);
-            }
-
-            // FEATURE 7
-            float MeanHeightDifference = -(avgDiff / (float) field_width) * meanHeightDifferenceWeight;
-
-
 
             //from there extract: bumpieness:
             int bumpieness = 0;                                            //FEATURE!!
@@ -529,11 +497,17 @@ public class TetrisInterface extends Game
                 bumpieness = bumpieness + abs(height_map[j]-height_map[j-1]);
             }
 
-            //TODO: INCLUDE DIFFERENCE FEATURES SEE WHEN TREES FALL WEBSITE!!!
+            // FEATURE 7
+            float avg_ht = (float) aggregate_height / field_width;
 
-            //return new double[]{total_num_holes,num_cleared_rows,aggregate_height,bumpieness};
-            //new: 11 features from paper!!!
-            return new double[]{Roughness, MaxColumnHeight, NumRowsCleared, HasLost, NumFaults, PitDepths, MeanHeightDifference};
+            float avg_diff = 0;
+            for (int j=0; j<field_width; j++){
+                avg_diff += Math.abs(avg_ht - height_map[j]);
+            }
+
+            float ht_diff_feature = -(avg_diff / (float) field_width) * wt_mean_ht;
+
+            return new double[]{rough_feature, max_col_ht, num_clear_rows, loss_move, num_tot_holes, pit_ht_feature, ht_diff_feature};
         //}
     }
 

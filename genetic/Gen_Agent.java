@@ -184,51 +184,24 @@ public class Gen_Agent {
     public double[] do_genetic_learning(int num_generations, int population_size, int child_heuristic, 
         double fraction, double prop_mutation, double fraction_direct_pass){
         System.out.println("Simple agent performance was launched...");
-        //STEP1: make a first random population
-        //general assumption: feature 0,2,3 must be penalized
-        //feature 1 must be pushed -> positive
 
-        int size_init_population = population_size; //was 500
+        int size_init_population = population_size;
         int num_repetitions = 5;
         double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
         double[]weights_lowerbound = new double[game.numFeatures()];
         Arrays.fill(weights_lowerbound, 0.0);
         double[]weights_upperbound = new double[game.numFeatures()];
         Arrays.fill(weights_upperbound, 1.0);
-        //manual cheating:
-        // Arrays.fill(weights_upperbound, 0.0);
-        // weights_lowerbound[3]=0;
-        // weights_upperbound[3]=100000;
 
         // generate initial population
         for (int i=0;i<size_init_population;i++){
             for (int j = 0; j<game.numFeatures(); j++){
-                //TODO: instead of always starting from a completely random population, add some good individuals from the beginning
                 init_population[i][j]= getRandom(weights_lowerbound[j],weights_upperbound[j]);
                 this.weights_loaded = true;
             }
         }
 
-        // init_population[0] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581, 86516.3};
-        // init_population[1] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,78561.4};
-        // init_population[2] = new double[] {-0.03497211045837952,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,76210.8};
-        // init_population[3] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,70503.5};
-        // init_population[4] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,70491.6};
-        // init_population[5] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-1023.6018123274217,69749.8};
-        // init_population[6] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,68253.3};
-        // init_population[7] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,55558.3};
-        // init_population[8] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-26260.87767773257,-848.1350849151581,53088.1};
-        // init_population[9] = new double[] {-0.03954396067533136,-38176.5851152073,-149067.0334177295,336.34108438682597,-0.0016361556415439,-24509.304811624967,-23515.588128517633,-1.3861447244286251,-482.81368390013466,-19430.13402577235,-848.1350849151581,51523.7};
-
-        // for (int i=10;i<size_init_population;i++){
-        //         //TODO: instead of always starting from a completely random population, add some good individuals from the beginning
-        //     for (int j = 0; j<game.numFeatures(); j++) {
-        // 		init_population[i][j]= getRandom(weights_lowerbound[j],weights_upperbound[j]);
-        // 	}
-        //     this.weights_loaded = true;
-        // }
         System.out.println("Initial population generated....");
-        //play with all the 1000 combinations and store the highest
         try {
         	init_population = evalPopulation(init_population,num_repetitions);
         }
@@ -240,33 +213,9 @@ public class Gen_Agent {
         
         System.out.println("Initial population succesfully evaluated");
 
-        //STEP2: choose the best ones -> selection
-        // double tokeep = 0.05; //percentage of initial population you want to keep, must be smaller than 1!!!
-        // double size_new_pop = 0.3; //size of new population relative to initial population (should be smaller than 0.5)
-        //reason: is twice this percentage later cause cross over is mutual -> real percentace = 2*size_new_pop
-
-        int numGenerations = num_generations; //100
-        //double fraction = fraction;
-        //int child_heuristic = child_heuristic; 
-        //double prop_mutation= prop_mutation;
-        //double fraction_direct_pass = fraction_direct_pass;
-
-
-        /*TODO: new function that will use doCrossingMutation and will generate the new generation from the old one in as follows:
-            - take 25-30% of the best performing parents as children
-            - the rest 70-75% will be generated by crossing and mutation: 
-                - for 1 of the parents we choose randomly 30% from the parents and choose the best performing from the subset
-                - do same for the second parent
-                - pick one or pick avg for generating child weights (implement both and compare!)
-                - Mutation: For each member and each weight, check if mutation occurs and if it does then multiply weight with uniform -1.5 and 1.5
-                - Fitness function check: check if the child performs as least as good as the worst child so far. If so, remove the child.
-                Set a limit of kicked out childs and take the best removed one as a child.*/ 
-        
+        int numGenerations = num_generations; //100        
 
         for (int i = 0; i < numGenerations ; i++) {
-             //TODO: train over multiple generations 
-            //STEP3: crossover and mutation
-            //double[][] selected_population = doCrossingandMutation(init_population,tokeep,size_new_pop,prop_mutation,weights_lowerbound,weights_upperbound);
             init_population = doCrossingandMutation_new(init_population, num_repetitions, fraction, child_heuristic, prop_mutation, fraction_direct_pass);
             System.out.println( (i+1) + " Selected population created....");
             
@@ -299,7 +248,6 @@ public class Gen_Agent {
         String fileName = size_init_population + "_" + numGenerations + "_" + child_heuristic + "_" + dataString;
         storeMatrix("resources/genetic/" + fileName, init_population, numGenerations, size_init_population, child_heuristic);
 
-        // System.out.println("Executor : You have completed "+init_population[0][game.numFeatures()]+" rows.");
         //BEST WEIGHTS:
         System.out.println(Arrays.toString(init_population[0]));
 
@@ -387,7 +335,6 @@ public class Gen_Agent {
 	            for (int j = 0 ; j < num_repetitions; j++)
 	            {
 	                store_score[j] = performers[j].getVal();
-	                // System.out.println("Score : " + store_score[j]);
 	                // store_score[j] = Gen_Agent.this.perf_scores[j];
 	            }
 
@@ -445,7 +392,6 @@ public class Gen_Agent {
     }
 
     private double[] evalChild(double[] child, int num_repetitions) throws InterruptedException {
-            //set weights in this iteration
         for (int j = 0; j < game.numFeatures(); j++) {
             this.weights[j] = child[j];
         }
@@ -459,7 +405,6 @@ public class Gen_Agent {
             performers[j].setGame(j);
             executor.execute(performers[j]);
             // store_score[j] = performer.getVal();
-            // System.out.println("Store score is : " + store_score[j]);
         }
 
         executor.shutdown();
@@ -472,14 +417,6 @@ public class Gen_Agent {
 
         double score_best = store_score[0];
 
-        //HERE: store BEST SCORE VALUE!
-        //for (int j = 1; j < num_repetitions; j++) {
-        //    if (store_score[j] > score_best) {
-        //        score_best = store_score[j];
-        //    }
-        //}
-
-        //OR: store the MEAN of all scores:
         for (int j = 1; j < num_repetitions; j++) {
             score_best = score_best + store_score[j];
         }
@@ -489,33 +426,23 @@ public class Gen_Agent {
     	return child;
     }
 
-
-
-
-
-
-    int pickParentnew(double[][]input_population, double[][]eval_population, float totalFitness, int num_features){
-        float decision = random.nextFloat() * totalFitness;
+    int pickParentnew(double[][]input_population, double[][]eval_population, float fit_total, int num_features){
         int j;
+        double temp_check;
+        temp_check = random.nextFloat() * fit_total;
 
         for(j = 0; j < input_population.length; j++) {
-            double fitness = eval_population[j][num_features];
-
-            if(decision < fitness) {
+            double curr_fit = eval_population[j][num_features];
+            if(temp_check < curr_fit) {
                 return j;
             }
             else {
-                decision -= fitness;
+                temp_check = temp_check - curr_fit;
             }
         }
 
         return 0;
     }
-
-
-
-
-
 
     private double[][] doCrossingandMutation_new(double[][] input_population, int num_repetitions, double fraction, int child_heuristic, double prop_mutation, double fraction_direct_pass){
         int size_input = input_population.length;
@@ -533,24 +460,23 @@ public class Gen_Agent {
             System.out.println("caught interrupted exception");
         }
 
-        float totalFitness = 0.0f;
+        float fit_total = 0.0f;
         for(int j = 0; j < size_input; j++) {
-            totalFitness += eval_population[j][num_features];
+            fit_total += eval_population[j][num_features];
         }
 
         int pop_size_thus_far = 0;
 
         while(pop_size_thus_far < size_input) {
-            int parent1 = pickParentnew(input_population, eval_population, totalFitness, num_features);
-            int parent2 = pickParentnew(input_population, eval_population, totalFitness, num_features);
+            int parent1 = pickParentnew(input_population, eval_population, fit_total, num_features);
+            int parent2 = pickParentnew(input_population, eval_population, fit_total, num_features);
 
             if(random.nextFloat() < crossoverRate) {//cross over happens
-                int crossoverPoint = random.nextInt(num_features + 1);
-
-                System.arraycopy(input_population[parent1], 0, new_population[pop_size_thus_far], 0, crossoverPoint);
-                System.arraycopy(input_population[parent2], 0, new_population[pop_size_thus_far + 1], 0, crossoverPoint);
-                System.arraycopy(input_population[parent1], crossoverPoint, new_population[pop_size_thus_far + 1], crossoverPoint, num_features - crossoverPoint);
-                System.arraycopy(input_population[parent2], crossoverPoint, new_population[pop_size_thus_far], crossoverPoint, num_features - crossoverPoint);
+                int pos_of_cross = random.nextInt(num_features + 1);
+                System.arraycopy(input_population[parent1], 0, new_population[pop_size_thus_far], 0, pos_of_cross);
+                System.arraycopy(input_population[parent2], 0, new_population[pop_size_thus_far + 1], 0, pos_of_cross);
+                System.arraycopy(input_population[parent1], pos_of_cross, new_population[pop_size_thus_far + 1], pos_of_cross, num_features - pos_of_cross);
+                System.arraycopy(input_population[parent2], pos_of_cross, new_population[pop_size_thus_far], pos_of_cross, num_features - pos_of_cross);
                 pop_size_thus_far = pop_size_thus_far + 2;
             }
             else {
@@ -600,13 +526,6 @@ public class Gen_Agent {
         return max_score_idx;
     }
 
-
-    //expects: population that we want to mutate and cross which is ordered descendingly!!!
-    //to_keep = percentage of population we want to use for crossover
-    //size_new: how big should new population be in percent of initial!!!
-    //prop_mutation = propability for a possible mutation
-    //weights intervals needed for the possible mutation!
-    //returns: new crossed and mutated array!!
     private double[][] doCrossingandMutation(double[][] input_population, int num_repetitions, double fraction, int child_heuristic, double prop_mutation, double fraction_direct_pass){
         int size_input = input_population.length;
         int bestOfOld = (int) Math.round(fraction_direct_pass * input_population.length);
@@ -789,7 +708,6 @@ public class Gen_Agent {
     public void loadMatrix(final String filename)
     {
         int num_features_txt = 0;
-        //System.out.println("resources/genetic/"+filename);
         try
         {
             final BufferedReader in = new BufferedReader(new FileReader("resources/genetic/"+filename));
@@ -798,18 +716,13 @@ public class Gen_Agent {
             int offset = 1; //there stand the number of weights!!!
             int i = 0;
             int a = 0;
-            //System.out.println(game.numFeatures());
             while ((line = in.readLine()) != null)
             {
-                //System.out.print(line);
-                //System.out.print("\n");
-                //System.out.print(i);
                 if (i==offset){
                     final String[] values = line.split(",");
                     for (String str : values)
                     {
                         num_features_txt = Integer.parseInt(str);
-                        //Stop if number of features do not coincide
                         if(num_features_txt!=game.numFeatures()){throw new java.lang.Error("number of features are different!");}
                     }
                 }
