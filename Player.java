@@ -5,6 +5,7 @@ import genetic.Gen_Agent;
 public class Player {
 	private static int num_generations, population_size, child_heuristic;
 	private static double fraction, prop_mutation, fraction_direct_pass;
+	private static boolean want_to_train;
 
 	public static void main(String[] args) {
 		//Arguments to pass for running
@@ -16,7 +17,9 @@ public class Player {
 			fraction = Double.parseDouble(args[3]);
 	        prop_mutation= Double.parseDouble(args[4]);
 	        fraction_direct_pass = Double.parseDouble(args[5]);
+	        want_to_train = true;
 		}
+		else {want_to_train = false;}
 		new Player();
 	}
 
@@ -36,7 +39,6 @@ public class Player {
 		// }
 		TetrisInterface ti = new TetrisInterface();
 		Gen_Agent agent = new Gen_Agent(ti);
-		boolean want_to_train = false;
 
 		if(!want_to_train){
 			//SIMPLY PLAY
