@@ -531,7 +531,6 @@ public class TetrisInterface extends Game
     public int numFeatures()
     {
         //add +1 since rows cleared is already available after the virtual move!!!
-        //TODO: adapt to function above
 
         return /*encoder.encoderReady() ? encoder.getEncoderSize() :*/ (6+1);
     }
