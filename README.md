@@ -42,6 +42,29 @@ game.Player:
 An example of how to implement a player.
 The main function plays a game automatically (with visualization).
 
-## Ideas
+## EXPLICITLY ADDED FUNCTIONALITY BY GROUP 33:
+
+1) PLAYING CTB WITH Q-LEARNING:
+Apart from the general, genetic algorithm based Tetris Implementation we also experimented with Q-Learning in combination with the very easy game of Catch the Ball.
+Feel free to launch our Q-learning based CTB player by navigating to:
+tests/CTB/
+and by LAUNCHING:
+CTBPlayerQ.java
+This will first launch our Q-learning algorithm which will learn the optimal transition for each state and then show the performance by launching the CTB game!!!
+
+2) PLAYING SMALL TETRIS VERSION BASED ON Q-LEARNING:
+Also feel free to navigate to: tests/SmallTetris
+and launch: TetrisSmallPlayer.java
+This will launch a Q-learning based Tetris Agent which will be again launched immediately after training
+
+3) NORMAL TETRIS GENETIC AGENT:
+3.1) Can be launched by simply executing the: Player.java file (without any input arguments)
+3.2) Training the weights can be forced by launching Player.java with 6 arguments, namely: (int) number of generations, (int) population size, (int) heuristic, (double) fraction, (double) propability for mutation, (double) fraction of the population which is directly passed
+SAMPLE USAGE OF 3.2: java Player 40 50 4 0.3 0.01 0.1
+
+4) GENERAL CODE STRUCTURE:
+To keep our code as general as possible, in the game folder we declared the abstract game class. Our intention was that every additional game that we want to be able to play should have the functionality declared in this abstract class. Therefore if all the games stick to this abstract class definition our genetic agent/algorithm which is defined in /genetic/Gen_Agent.java will be able to play it!!!    
+
+
 * Encode whole state: Autoencoder (neural network), PCA
 * General Gaming Agent ??
