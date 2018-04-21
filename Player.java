@@ -31,7 +31,7 @@ public class Player {
 		if(!want_to_train)
 		{
             System.out.println("Simple agent performance was launched...");
-			agent.loadMatrix("7_340k.txt");
+			agent.loadMatrix("weights.txt");
             double[] wts = agent.get_weights();
 			Gen_Agent.Performer performer = agent.new Performer(wts);
 			performer.activateVisualisation();
