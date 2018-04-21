@@ -21,8 +21,8 @@ public class Gen_Agent {
 	private final double OMEGA = 0.6;
 	private final double RHOP = 1.4;
 	private final double RHOG = 2.0;
-	private final double BOUND_HIGH = -1;
-	private final double BOUND_LOW = 1;
+	private final double BOUND_HIGH = -0.5;
+	private final double BOUND_LOW = 0.5;
 	private final double BOUND_RANGE = BOUND_HIGH - BOUND_LOW;	
 
     private Game        game;
@@ -473,10 +473,13 @@ public class Gen_Agent {
         ExecutorService executor1 = Executors.newFixedThreadPool(population.length);
         Evaluator[] evaluators = new Evaluator[population.length];
         
+
         for (int i=0;i<size_population;i++) {
             //set weights in this iteration
+            System.out.println("old : " + population[i][1]);
             updateVel(OMEGA, RHOP, RHOG, i, population[i]);
             population[i] = updatePos(i, population[i]);
+            System.out.println("new : " + population[i][1]);
             for (int j = 0; j < game.numFeatures(); j++) {
                 this.weights[j] = population[i][j];
 
