@@ -28,12 +28,9 @@ public class Gen_Agent {
     public Gen_Agent(Game game)
     {
         this.game = game;
-        //this.weights = new double[]{-0.51,0.76,-0.3566,-0.18448}; //internet weights
-        //this.weights = new double[]{-3.459111196332234, 8.798745927744655, -17.509339945947517, -4.244590461223442}; //best trained so far!
         this.weights = new double[game.numFeatures()]; //only to initialize
         this.weights_loaded = false;
         this.perf_scores = new int[1000]; // globally set everytime a game is played
-        // this.games = games;
     }
 
     public double[] get_weights() {
@@ -112,17 +109,14 @@ public class Gen_Agent {
                 //Arrays.fill(score, Double.POSITIVE_INFINITY);
             //STEP3: if valid action - play perform the actions virtually and compute the features
                 for (int move=0; move < all_actions; move++){
-                    if (game.checkAction(move)){
-                        //calculate the features on the initial board configuration:
-                        //TODO: here calculate the features on the Ausgangslage!!
+                    if (game.checkAction(move)){ //is this a valid action?
                         Results outcome = game.virtual_move(game.state(),move);
                         if (outcome.terminated!=true){ //this means games is not over in this drive!
                             //calculate all features!!!
-                            //TODO: replace this function by operator overloading to calculate differential features!!!
                             double[] features = game.features(outcome);
 
-                            double score_ = 0;
                             //calculate the score
+                            double score_ = 0;
                             for (int k=0; k<num_features;k++){
                                 score_ = score_ + weights[k]*features[k];
                             }
@@ -144,13 +138,6 @@ public class Gen_Agent {
                     }
                 }
 
-                for(int i=(best_move+1);i<all_actions;i++){
-                    if ((score[i]>best_score)&game.checkAction(i)){
-                        best_score = score[i];
-                        best_move = i;
-                        break;
-                    }
-                }
 
                 for(int i=(best_move+1);i<all_actions;i++){
                     if ((score[i]>best_score)&game.checkAction(i)){
@@ -165,29 +152,27 @@ public class Gen_Agent {
                 //CTB: -1* absolute distance between ball and board -> if we search for maximum we find the best!!!
                 total_reward = results.reward;
             }
-            // System.out.println("You have completed "+total_reward+" rows.");
-            // return (int)total_reward;
-            this.retVal = (int)total_reward; // NOT NEEDED
+            this.retVal = (int)total_reward;
             Gen_Agent.this.perf_scores[whichGame] = this.retVal;
             // System.out.println("Setting " + this.retVal + " rows");
             game = game.restart();
             
         }
 
-        // NOT NEEDED
         public int getVal() {
             // System.out.println("Returning " + this.retVal + " rows");
             return this.retVal;
         }
     }
 
+    //This function does the genetic learning, input arguments used to specify the learning!
     public double[] do_genetic_learning(int num_generations, int population_size, int child_heuristic, 
         double fraction, double prop_mutation, double fraction_direct_pass){
         System.out.println("Simple agent performance was launched...");
 
         int size_init_population = population_size;
         int num_repetitions = 5;
-        double[][]init_population = new double[size_init_population][game.numFeatures()+1]; //1000 init weights,... store weights and score
+        double[][]init_population = new double[size_init_population][game.numFeatures()+1];
         double[]weights_lowerbound = new double[game.numFeatures()];
         Arrays.fill(weights_lowerbound, 0.0);
         double[]weights_upperbound = new double[game.numFeatures()];
@@ -213,7 +198,7 @@ public class Gen_Agent {
         
         System.out.println("Initial population succesfully evaluated");
 
-        int numGenerations = num_generations; //100        
+        int numGenerations = num_generations;
 
         for (int i = 0; i < numGenerations ; i++) {
             init_population = doCrossingandMutation_new(init_population, num_repetitions, fraction, child_heuristic, prop_mutation, fraction_direct_pass);
@@ -225,6 +210,7 @@ public class Gen_Agent {
             for (int j = 0; j < minLenght; j++) {
                 System.arraycopy(init_population[j], 0, bestTen[j], 0, bestTen[j].length);
             }
+            //Store the current training state!
             String dataString = new SimpleDateFormat("yyyyMMddHHmm'.txt'").format(new Date());
             String fileName = size_init_population + "_" + numGenerations + "_" + child_heuristic + "_iteration_" + (i+1) + "_" + dataString;
             storeMatrix("resources/genetic/iterations/" + fileName, bestTen, numGenerations, size_init_population, child_heuristic);
