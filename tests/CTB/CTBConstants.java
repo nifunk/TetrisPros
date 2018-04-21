@@ -1,9 +1,9 @@
-package tests;
+package tests.CTB;
 
 public class CTBConstants
 {
 
-    public static int field_width  = 20;
+    public static int field_width  = 12;
     public static int field_height = 400;
 
     public static int ball_radius   = 1;

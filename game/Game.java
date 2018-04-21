@@ -1,10 +1,10 @@
 package game;
 
-//import autoencoder.StateEncoder;
+import autoencoder.Encoder;
 
 public abstract class Game {
 
-    //public StateEncoder encoder = new StateEncoder();
+    public Encoder encoder;
 
     // Results of a (random) initial game state.
     abstract public Results initial();

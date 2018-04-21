@@ -12,8 +12,8 @@ public class QLearning
     private int _num_actions;
 
     private final double MIN_ALPHA = 0.2;
-    private final double GAMMA     = 1.0;
-    private final double EPS       = 0.3;
+    private final double GAMMA     = 0.8;
+    private final double EPS       = 0.5;
 
     public QLearning(final int num_states, final int num_actions)
     {
@@ -86,11 +86,13 @@ public class QLearning
             {
                 final FileWriter fw = new FileWriter(filename);
                 for (double[] action_rewards : _q_matrix)
+                {
                     for (double reward : action_rewards)
                     {
                         fw.write(reward + ",");
                     }
                     fw.write("\n");
+                }
                 fw.close();
             } catch (IOException e) { e.printStackTrace(); }
             System.out.println("Stored Q Matrix in " + filename);

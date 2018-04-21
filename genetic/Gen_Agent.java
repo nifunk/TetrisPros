@@ -13,9 +13,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import game.TetrisInterface;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.TimeUnit;
-import java.util.Random;
 
 public class Gen_Agent {
 
@@ -72,17 +70,11 @@ public class Gen_Agent {
         private double[]    weights;
         private boolean     weights_loaded;
         
-        public Performer(double[] wts) {
-            // Gen_Agent ga = new Gen_Agent(game);
+        public Performer(double[] wts)
+        {
             this.game = new TetrisInterface();
             this.weights = wts;
             this.weights_loaded = true;
-    
-        }
-
-       
-        public void setGame(int gameNum) {
-            this.whichGame = gameNum;
         }
 
         // public int perform() {
@@ -159,10 +151,14 @@ public class Gen_Agent {
             
         }
 
-        public int getVal() {
-            // System.out.println("Returning " + this.retVal + " rows");
-            return this.retVal;
+        public void setGame(int gameNum) {
+            this.whichGame = gameNum;
         }
+
+        public int getVal() { return this.retVal; }
+
+        public void activateVisualisation() { this.game.activateVisualisation(); }
+
     }
 
     //This function does the genetic learning, input arguments used to specify the learning!
@@ -734,7 +730,8 @@ public class Gen_Agent {
         System.out.println(Arrays.toString(this.weights));
     }
 
-    public String getCurrentTimeStamp() {
+    public String getCurrentTimeStamp()
+    {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
     }
 

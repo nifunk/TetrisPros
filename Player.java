@@ -24,56 +24,32 @@ public class Player {
 	}
 
 	private Player() {
-    	////For Q-qlearning:
-		//QAgent agent = new QAgent(new TetrisInterface());
-		//// Train encoder and agent.
-        //agent.adapt();
-		//// Perform as demonstration of results.
-        ////agent.getGame().activateVisualisation();
-    	//agent.perform();
 
-		//For Genetic algorithm: -> HAND CRAFTED FEATURES:
-		// TetrisInterface [] ti = new TetrisInterface[1000];
-		// for (int i=0; i < ti.length; i++) {
-		// 	ti[i] = new TetrisInterface();
-		// }
 		TetrisInterface ti = new TetrisInterface();
 		Gen_Agent agent = new Gen_Agent(ti);
 
-		if(!want_to_train){
-			//SIMPLY PLAY
-			//agent.loadMatrix("best_4_features.txt");
-			//FROM PAPER:
-			//agent.loadMatrix("11_feat_paper.txt");
-			//BEST OWN TRAINED:
-			agent.loadMatrix("11_feat_ourbest_1.txt");
-			////let the player act
-			double[] wts = agent.get_weights();
-			System.out.println("Simple agent performance was launched...");
-			////agent.getGame().activateVisualisation();
+		if(!want_to_train)
+		{
+            System.out.println("Simple agent performance was launched...");
+			agent.loadMatrix("7_340k.txt");
+            double[] wts = agent.get_weights();
 			Gen_Agent.Performer performer = agent.new Performer(wts);
+			performer.activateVisualisation();
             performer.run();
-            performer.getVal();
-            // agent.perform();
+            final int cleared_rows = performer.getVal();
+            System.out.printf("Number of cleared rows = %d", cleared_rows);
 
 		}
-		else{
-			//let the player learn
-			System.out.println("Genetic qlearning was launched...");
-			agent.do_genetic_learning(num_generations, population_size, child_heuristic, fraction, prop_mutation, fraction_direct_pass);
+		else
+		{
+			System.out.println("Genetic learning was launched...");
+			agent.do_genetic_learning(num_generations,
+                                      population_size,
+                                      child_heuristic,
+                                      fraction,
+                                      prop_mutation,
+                                      fraction_direct_pass);
 		}
-
-		// TRAIN AUTO ENCODER
-		//Gen_Agent agent = new Gen_Agent(new TetrisInterface(), "test_tetris.eg", 200000);
-		// DO NOT TRAIN AUTOENCODER
-		//Gen_Agent agent = new Gen_Agent(new TetrisInterface(), "test_tetris.eg");
-		// Let the player learn.
-		//agent.do_genetic_learning();
-		// Let the player act.
-		//agent.loadMatrix("ctb_enc.txt");
-		//agent.getGame().activateVisualisation();
-		//agent.perform();
-
     
 		System.exit(0);
 	}

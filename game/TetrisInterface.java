@@ -3,7 +3,7 @@ package game;
 import java.util.Arrays;
 import java.util.Random;
 
-import static java.lang.Integer.min;
+import static java.lang.Math.min;
 import static java.lang.Math.abs;
 
 public class TetrisInterface extends Game
