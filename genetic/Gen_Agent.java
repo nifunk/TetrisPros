@@ -24,7 +24,14 @@ public class Gen_Agent {
     private boolean     weights_loaded;
     private int[]       perf_scores;
     Random random = new Random();
-
+    private final double pso_omega = 0.2;
+	private final double pso_local_coeff = 0.13;
+	private final double pso_global_coeff = 0.2;
+	
+	private double[][] 	vel;
+    private double[][]  personalBestWeights;
+    private double[]    globalBest;
+    
     public Gen_Agent(Game game)
     {
         this.game = game;
@@ -39,6 +46,32 @@ public class Gen_Agent {
     public double[] get_weights() {
         return this.weights;
     }
+
+    public void initVelocity(int popIndex) {
+    	for (int i = 0; i < game.numFeatures(); i++)
+    	{
+    		this.vel[popIndex][i] = getRandom(0,1) * (-2) * 2 - (-2);
+    	}
+    }
+
+    public void updateVelocity(int popIndex, double[] population) {
+		double rl, rg;
+
+		for (int i = 0; i < game.numFeatures(); i++) {
+			rl = getRandom(0, 1);
+			rg = getRandom(0, 1);
+
+			this.vel[popIndex][i] = pso_omega * vel[popIndex][i] + pso_local_coeff * rl * (personalBestWeights[popIndex][i] - population[i])
+					+ pso_global_coeff * rg * (globalBest[i] - population[i]);
+		}
+	}
+
+	public double[] updatePosition(int popIndex, double[] population) {
+		for (int i = 0; i < game.numFeatures(); i++) {
+			population[i] = population[i] + vel[popIndex][i];
+		}
+		return population;
+	}
 
     /*public Gen_Agent(Game game, final String encoder_load_file)
     {
@@ -192,11 +225,19 @@ public class Gen_Agent {
         Arrays.fill(weights_lowerbound, 0.0);
         double[]weights_upperbound = new double[game.numFeatures()];
         Arrays.fill(weights_upperbound, 1.0);
+        this.vel = new double[population_size][game.numFeatures()];
+        this.personalBestWeights = new double[population_size][game.numFeatures()+1];
+        this.globalBest = new double[game.numFeatures()+1];
+
 
         // generate initial population
         for (int i=0;i<size_init_population;i++){
+            initVelocity(i);
+            
             for (int j = 0; j<game.numFeatures(); j++){
                 init_population[i][j]= getRandom(weights_lowerbound[j],weights_upperbound[j]);
+                this.personalBestWeights[i][j] = init_population[i][j];
+                this.globalBest[j] = init_population[i][j];
                 this.weights_loaded = true;
             }
         }
@@ -370,6 +411,9 @@ public class Gen_Agent {
         
         for (int i=0;i<size_population;i++) {
             //set weights in this iteration
+            updateVelocity(i, population[i]);
+            population[i] = updatePosition(i, population[i]);
+            
             for (int j = 0; j < game.numFeatures(); j++) {
                 this.weights[j] = population[i][j];
             }
@@ -384,10 +428,26 @@ public class Gen_Agent {
         for (int i = 0; i < population.length; i++)
         {
         	population[i] = evaluators[i].getPopulation();
-        	System.out.println("Returned : " + population[i][game.numFeatures()]);
+        	if (population[i][game.numFeatures()] > this.personalBestWeights[i][game.numFeatures()])
+        	{
+        		for (int k = 0 ;k <= game.numFeatures(); k++)
+        		{
+        			this.personalBestWeights[i][k] = population[i][k];
+        		}
+        	System.out.println("Updating personal best : " + this.personalBestWeights[i][game.numFeatures()]);
+        	}
+        	
         }
         
         sortbyColumn(population,game.numFeatures());
+        if (population[0][game.numFeatures()] > this.globalBest[game.numFeatures()])
+        {
+        	for (int k = 0 ;k <= game.numFeatures(); k++)
+    		{
+    			this.globalBest[k] = population[0][k];
+    		}
+    		System.out.println("Updating global best : " + this.globalBest[game.numFeatures()]);
+        }
         return population;
     }
 
