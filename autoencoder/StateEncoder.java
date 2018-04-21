@@ -1,4 +1,4 @@
-/*package autoencoder;
+package autoencoder;
 
 
 import org.encog.engine.network.activation.ActivationLinear;
@@ -104,4 +104,4 @@ public class StateEncoder
 
     public boolean encoderReady() { return network_ready; }
 
-}*/
+}

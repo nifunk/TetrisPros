@@ -36,7 +36,7 @@ public class Player {
 		// }
 		TetrisInterface ti = new TetrisInterface();
 		Gen_Agent agent = new Gen_Agent(ti);
-		boolean want_to_train = true;
+		boolean want_to_train = false;
 
 		if(!want_to_train){
 			//SIMPLY PLAY
