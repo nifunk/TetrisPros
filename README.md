@@ -1,5 +1,5 @@
 # Abstract
-This report is about the challenge of designing an utility based agent which can maximize the number of rows cleared in the game of Tetris. We achieved the best performance using a genetic algorithm but also present other approaches.
+**This report is about the challenge of designing an utility based agent which can maximize the number of rows cleared in the game of Tetris. We achieved the best performance using a genetic algorithm but also present other approaches.**
 
 # 1 Introduction
 The game of Tetris has seven distinct block shapes (Tetraminos), which can be manoeuvred by translation or rotation. The ultimate goal is to place the Tetraminos such that the number of cleared rows is maximized and that, in theory, the game never terminates.
@@ -40,11 +40,10 @@ Table 2 shows us that the while the minimum number of rows cleared is 101, we cl
 Figure ?? shows that there is a linear relationship between the mean and the median of the 10 best results of each generation during training. This means that we don’t get random outliers of weights which give good scores for very few members while all others perform poorly. Instead we have a smooth development and increase of the performance during training. Also, the graph shows that the mean scores during training are lower for population sizes of 15 and 25, and increases significantly for population sizes greater than 40. The performance tends to converge for population size 40, as
 there isn’t any improvement with population size 100. This means that the population size has to pass a certain threshold such that the random processes of crossing over and mutation are likely to ”produce” significant improvements.
 
-[[https://github.com/SeleSchaefer/TetrisPros/tree/master/report/imgs/Results_Hists.png|alt=Results_Hists]]
+<img src="report/imgs/Results_Hists.png" alt="" style="width: 400px;"/>
 Figure 1: Results from 100 iterations of the game
 
-
-[[https://github.com/SeleSchaefer/TetrisPros/tree/master/report/imgs/Median_Mean.png|alt=Median_Mean]]
+<img src="report/imgs/Median_Mean.png" alt="" style="width: 400px;"/>
 Figure 2: Mean-Median plot of intermediate scores during training for different population sizes.
 
 # 3 Further Experiments
@@ -93,7 +92,7 @@ For the purpose of shrinking the state-space several approaches were tested. Mos
 ### 3.4.2 Auto Encoder
 High-dimensional data can be converted to a lower-dimensional representation by training a multilayer neural network. This network (see figure ??) is symmetric with respect to the small central layer (whose output is the encoded input). Therefore the first part of the network encodes the data, while the second one decodes it and the resulting error is used to optimize the networks’ weights ([?]). In the Tetris game an auto encoder can be used to encode the field (state) and replace it by a low-dimensional column vector.
 
-[[https://github.com/SeleSchaefer/TetrisPros/tree/master/report/imgs/encoder_structure.png|alt= encoder_structure]]
+<img src="report/imgs/encoder_structure.png" alt="" style="width: 400px;"/>
 Figure 3: Auto Encoder Architecture
 
 
@@ -105,7 +104,7 @@ Instead of manual feature engineering the features could be derived by learning 
 # 4 General Agent
 Another goal of our project was to design the agents in a general style such that they are not limited to only playing Tetris, but can be easily deployed and tested on CTB or any other game which is implemented in line with our abstract (general) game class. The roadbloack here is that we have not yet found an algorithm which can automatically calculate reasonable set of features. Therefore human ”feature engineering” will still be required.
 
-[[https://github.com/SeleSchaefer/TetrisPros/tree/master/report/imgs/encoder_errors.png|alt= encoder_errors]]
+<img src="report/imgs/encoder_errors.png" alt="" style="width: 400px;"/>
 Figure 4: Auto Encoder Training errors
 
 # 5 Discussion
