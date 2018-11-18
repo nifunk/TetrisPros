@@ -1,0 +1,10 @@
+\section{Introduction}
+\label{sec:problem}
+The game of Tetris has seven distinct block shapes (Tetraminos), which can be manoeuvred by translation or rotation. The ultimate goal is to place the Tetraminos such that the number of cleared rows is maximized and that, in theory, the game never terminates.  
+\newline
+The Tetris game is fully observable since the complete board is known at any point in time. It is sequential and static, as the orientation of Tetraminos merely changes as a consequence of the player's moves. The game is discrete as it acts in a discrete 20x10 grid. Though each action is deterministic, while the choice of the next Tetramino is randomly distributed over all seven shapes.
+\newline
+The next player move can be determined using a utility based agent. Its utility function is a weighted sum of different features of the board for a given state, which can be determined using genetic algorithm. The following section gives a detailed overview of our implementation.
+\vspace{-0.8cm}
+% Tetris is a popular computer game invented by Alexey Pajitnov in 1985, played on a 20x10 rectangular grid and filled by Tetraminos (seven distinct shapes of blocks). The player maneuvers the blocks by rotation and translation to place them on the board. When a row of is fully occupied it is removed. The objective of the game is to clear as many rows as possible.
+% \newline 
