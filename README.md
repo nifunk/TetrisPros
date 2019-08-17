@@ -117,7 +117,7 @@ Svilen Stefanov: Svilen-Stefanov / svilen.ks@gmail.com
 
 Madhav Goel: madhav-goel
 
-Arijit Pramanik: Arijit-hydrated
+Arijit Pramanik: theUltraMarine19 / arijit@cs.wisc.edu
 
 Simon Schaefer: SeleSchaefer / sischaef@student.ethz.ch
 
