@@ -10,6 +10,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Random;
+/** incorporate multi-processing using ExecutorService
+ * Check the branch "genetic_dev"
+ */
 
 public class Gen_Agent {
 
